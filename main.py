@@ -7,16 +7,38 @@ class Cell(ABC):
     """
     Base class for all cells in file
 
-    every instance of this class must realize _open_ and _edit_ methods
+    every instance of this class must realize _open_ and _edit_ methods that changes current layout
     """
 
     @abstractmethod
-    def __init__(self):
+    def __init__(self, data):
+        self.__data__: dict = data
+        self._render_()  # rendering data
+        self.view_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = self._open_()    # showing data
+        self.edit_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
+        ...
+
+    @abstractmethod
+    def _render_(self):
+        """
+        creates new view frame based on __data__
+        :return:
+        """
+        ...
+
+    @abstractmethod
+    def _save_(self):
+        """
+        saves  changes into file
+        :return:
+        """
         ...
 
     @abstractmethod
     def _open_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
         """
+        changes current layout to view mode and renders it again
+
         :return: CTkFrame[Scrollable] object with rendered information ( rather not editable )
         """
         ...
@@ -24,9 +46,43 @@ class Cell(ABC):
     @abstractmethod
     def _edit_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
         """
+        changes current layout to edit mode
+
         :return:  CTkFrame[Scrollable] object allows to edit data in it
         """
         ...
+
+
+class PlainTextCell(Cell, ABC):
+
+    def __init__(self, data):
+        """
+        :param data: {"text": <some text> }
+        """
+        self.__data__: dict = data
+        self.view_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
+        self.edit_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
+        self._render_()  # rendering data
+        self._open_()    # showing data
+
+    def _render_(self):
+        data = self.__data__
+
+        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2)
+        self.view_frame = new_frame
+        self.view_frame.pack()
+
+        text = data["text"]
+        text_frame = ctk.CTkLabel(text=text, font=('Arial', 16))
+
+    def _open_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        self.view_frame.tkraise()
+
+    def _edit_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, fg_color='#00FFAA')
+        self.edit_frame = new_frame
+        self.edit_frame.pack()
+        self.edit_frame.tkraise()
 
 
 class Viewer(ctk.CTkScrollableFrame):
@@ -41,6 +97,7 @@ class UpperMenu(ctk.CTkFrame):
     """
     frame with instruments for editing
     """
+
     def __init__(self, parent):
         super().__init__(parent, height=75)
 
@@ -49,6 +106,7 @@ class RightMenu(ctk.CTkFrame):
     """
     frame for some instruments from right side of application
     """
+
     def __init__(self, parent):
         super().__init__(parent)
 
