@@ -1,11 +1,32 @@
 import customtkinter as ctk
+from typing import List, Tuple, Generator
+from abc import ABC, abstractmethod
+
+
+class Cell(ABC):
+    """
+    Base class for all cells in file
+
+    every instance of this class must realize _open_ and _edit_ methods
+    """
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def _open_(self):
+        pass
+
+    @abstractmethod
+    def _edit_(self):
+        pass
 
 
 class Viewer(ctk.CTkScrollableFrame):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.configure(fg_color='#FF0000')
+
+        self.cells: List[Cell] = []
 
 
 class UpperMenu(ctk.CTkFrame):
