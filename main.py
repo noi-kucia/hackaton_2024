@@ -320,11 +320,13 @@ class QuizCell(ctk.CTkFrame, Cell):
         # Check if the selected answers match the correct answers
         if set(selected_answers) == set(correct_answers):
             result_text = "Correct!"
+            result_color = "#00FF00"
         else:
             result_text = "Incorrect."
+            result_color = "#FF0000"
 
         # Display result
-        result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 16))
+        result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 20), text_color=result_color)
         result_label.grid(row=len(self.answer_vars) + 2, column=0, pady=10)
 
 
