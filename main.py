@@ -178,7 +178,7 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         # Display the question text
         question_text = data["text"]
-        question_label = ctk.CTkLabel(new_frame, text=question_text, font=('Arial', 16))
+        question_label = ctk.CTkLabel(new_frame, text=question_text, font=('Arial', 20))
         question_label.grid(row=0, column=0, sticky='WE', padx=10, pady=5)
 
         # Display the answers with checkboxes
@@ -188,7 +188,7 @@ class QuizCell(ctk.CTkFrame, Cell):
             answer_var = ctk.StringVar(value="")
             self.answer_vars.append(answer_var)
             answer_checkbox = ctk.CTkCheckBox(new_frame, text=answer, variable=answer_var, onvalue=answer, offvalue="")
-            answer_checkbox.grid(row=idx + 1, column=0, sticky='W', padx=20, pady=2)
+            answer_checkbox.grid(row=idx + 1, column=0, padx=20, pady=2)
 
         # Add a button to check answers
         check_button = ctk.CTkButton(new_frame, text="Check Answer", command=self.check_answer)
@@ -224,7 +224,7 @@ class QuizCell(ctk.CTkFrame, Cell):
         if self.edit_frame:
             self.edit_frame.pack_forget()
 
-        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500,
+        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=300,
                                            height=300)  # Adjust size as needed
         self.edit_frame = new_frame
         self.edit_frame.pack(expand=True, fill='both')
@@ -307,12 +307,14 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         # Check if the selected answers match the correct answers
         if set(selected_answers) == set(correct_answers):
-            result_text = "Correct!"
+            result_text = "Correct!!!"
+            result_color = '#00FF00'
         else:
-            result_text = "Incorrect."
+            result_text = "Incorrect!"
+            result_color = '#FF0000'
 
         # Display result
-        result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 16))
+        result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 20), text_color=result_color)
         result_label.grid(row=len(self.answer_vars) + 2, column=0, pady=10)
 
 
