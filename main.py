@@ -55,6 +55,29 @@ class Cell(ABC):
         ...
 
 
+class AutoWrappingCTkLabel(ctk.CTkLabel):
+    def __init__(self, master=None, **kwargs):
+        self.text = kwargs.pop("text", "")
+        super().__init__(master, **kwargs)
+        self.bind("<Configure>", self.on_resize)
+        self.configure(text=self.text)
+        self.update_wraplength()
+
+    def on_resize(self, event):
+        self.update_wraplength()
+
+    def update_wraplength(self):
+        current_width = int(self.winfo_width()/1.25)
+        print(current_width)
+        if current_width > 1:  # Avoid wraplength of 0
+            self.configure(wraplength=current_width)
+
+    def set_text(self, new_text):
+        self.text = new_text
+        self.configure(text=self.text)
+        self.update_wraplength()
+
+
 class PlainTextCell(ctk.CTkFrame, Cell):
 
     def __init__(self, parent, data):
@@ -80,10 +103,10 @@ class PlainTextCell(ctk.CTkFrame, Cell):
             self.view_frame.destroy()
             self.view_frame = None
         self.view_frame = new_frame
-        self.view_frame.pack(fill='both', side='top', expand=True)
+        self.view_frame.pack(fill='both')
 
         text = data["text"]
-        text_frame = ctk.CTkLabel(new_frame, text=text, font=('Arial', 20), compound='left')
+        text_frame = AutoWrappingCTkLabel(master=new_frame, text=text, font=('Arial', 20), justify='left')
         text_frame.grid(row=0, column=0, sticky='NSEW')
         text_frame.bind('<Double-Button-1>', self._edit_)
 
@@ -98,7 +121,9 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         self.view_frame.tkraise()
 
     def _save_(self):
-        pass
+        new_text = self.entry_frame.get("0.0", "end")
+        self.__data__["text"] = new_text
+        print("don't forget to save into file")
 
     def _edit_(self, event=None) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
         data = self.__data__
@@ -115,10 +140,13 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         self.edit_frame = new_frame
         self.edit_frame.pack(fill='both', expand=True, side='top')
 
-        entry_frame = ctk.CTkTextbox(new_frame, font=('Arial', 20))
-        entry_frame.insert('0.0', data["text"])
-        entry_frame.grid(row=0, column=0, sticky='NSEW')
-        entry_frame.bind('<Shift-Return>', self._open_)
+        def exit_edit_mode(event=None):
+            self._save_()
+            self._open_()
+        self.entry_frame = ctk.CTkTextbox(new_frame, font=('Arial', 20), wrap='word')
+        self.entry_frame.insert('0.0', data["text"])
+        self.entry_frame.grid(row=0, column=0, sticky='NSEW')
+        self.entry_frame.bind('<Shift-Return>', exit_edit_mode)
 
         self.edit_frame.tkraise()
 
