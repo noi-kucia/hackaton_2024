@@ -72,12 +72,13 @@ class PlainTextCell(ctk.CTkFrame, Cell):
 
         new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2)
         new_frame.columnconfigure(0, weight=1)
+        new_frame.rowconfigure(0, weight=1)
         self.view_frame = new_frame
-        self.view_frame.pack()
+        self.view_frame.pack(fill='both', expand=True, side=ctk.LEFT)
 
         text = data["text"]
-        text_frame = ctk.CTkLabel(new_frame, text=text, font=('Arial', 16))
-        text_frame.grid(row=0, column=0, sticky='WE')
+        text_frame = ctk.CTkLabel(new_frame, text=text, font=('Arial', 20), compound='left')
+        text_frame.grid(row=0, column=0, sticky='NSEW')
 
     def _open_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
         self.view_frame.tkraise()
@@ -92,14 +93,15 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         self.edit_frame.tkraise()
 
 
+
+
 class Viewer(ctk.CTkScrollableFrame):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.columnconfigure(0, weight=99)
 
         # test cells
-        cell1 = PlainTextCell(self, {"text": "some \nmultiline\ntext\t\t2131 ,kf ,kf kfjalfjl;kafjsdljl"})
+        cell1 = PlainTextCell(self, {"text": "some \nmultiline\ntext\t\t2131 ,kf ,kf kfjalfjl;kafjsdljlkfdjalkfjds;lkfsadkljds;lkfjds;lkaj;dslkjds;lkfajsde;lkjsdf;l'jfkalfskdl"})
 
         self.cells: List[Cell] = [cell1]
 
@@ -107,7 +109,10 @@ class Viewer(ctk.CTkScrollableFrame):
 
     def __draw__(self):
         for cell_num, cell in enumerate(self.cells):
+            self.columnconfigure(0, weight=99)
+            self.rowconfigure(0, weight=99)
             cell.grid(row=cell_num, column=0, sticky='WE')
+
 
 
 class UpperMenu(ctk.CTkFrame):
