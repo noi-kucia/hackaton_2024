@@ -200,7 +200,8 @@ class QuizCell(ctk.CTkFrame, Cell):
         for idx, answer in enumerate(answers):
             answer_var = ctk.StringVar(value="")
             self.answer_vars.append(answer_var)
-            answer_checkbox = ctk.CTkCheckBox(new_frame, text=answer, variable=answer_var, onvalue=answer, offvalue="")
+            answer_checkbox = ctk.CTkCheckBox(new_frame, text=answer, variable=answer_var, onvalue=answer, offvalue="",
+                                              font=('Arial', 20))
             answer_checkbox.grid(row=idx + 1, column=0, padx=20, pady=2)
 
         # Add a button to check answers
@@ -436,7 +437,34 @@ Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vita
         self.cells: List[Cell] = [cell1, cell2, cell3, cell4]
         self.__draw__()
 
+    def shift_cell_down(self, event=None):
+        if not self.selected_frame:
+            return
+
+        selected_index = self.cells.index(self.selected_frame)
+        before, after = self.cells[:selected_index], self.cells[selected_index + 1:]
+        if not after:
+            return
+        else:
+            after.insert(1, self.selected_frame)
+        self.cells = before+after
+        self.__draw__()
+
+    def shift_cell_up(self, event=None):
+        if not self.selected_frame:
+            return
+
+        selected_index = self.cells.index(self.selected_frame)
+        before, after = self.cells[:selected_index], self.cells[selected_index + 1:]
+        if not before:
+            return
+        else:
+            before.insert(-1, self.selected_frame)
+        self.cells = before + after
+        self.__draw__()
+
     def __draw__(self):
+        [cell.grid_forget() for cell in self.cells]
         for cell_num, cell in enumerate(self.cells):
             self.columnconfigure(0, weight=99)
             self.rowconfigure(0, weight=99)
@@ -459,26 +487,46 @@ class UpperMenu(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent, height=75)
         self.add_buttons()
+        self.central_label = ctk.CTkLabel(self, text='Open-IBF', font=('Arial', 24))
+        self.central_label.pack(fill='y', side='top', pady=(20, 0))
 
     def add_buttons(self):
-        upper_arrow_texture = ctk.CTkImage(dark_image=Image.open('uppper_arrow.png'))
-        self.upper_arrow_button = ctk.CTkButton(self, image=upper_arrow_texture, text="", width=28,
-                                                fg_color='transparent')
-        self.upper_arrow_button.pack(side='left', fill='y')
+
+        viewer = self.master.viewer
+
+        load_texture = ctk.CTkImage(dark_image=Image.open('open.png'))
+        self.open_button = ctk.CTkButton(self, image=load_texture, text="", width=32, fg_color='transparent')
+        self.open_button.pack(side='left', fill='y')
+
+        save_texture = ctk.CTkImage(dark_image=Image.open('save.png'))
+        self.save_button = ctk.CTkButton(self, image=save_texture, text="", width=32, fg_color='transparent')
+        self.save_button.pack(side='left', fill='y')
+
+        trash_bin_texture = ctk.CTkImage(dark_image=Image.open('trash_bin.png'))
+        self.delete_button = ctk.CTkButton(self, image=trash_bin_texture, text="", width=32, fg_color='transparent')
+        self.delete_button.pack(side='right', fill='y')
 
         down_arrow_texture = ctk.CTkImage(dark_image=Image.open('down_arrow.png'))
-        self.down_arrow_button = ctk.CTkButton(self, image=down_arrow_texture, text="", width=28,
-                                               fg_color='transparent')
-        self.down_arrow_button.pack(side='left', fill='y')
+        self.down_arrow_button = ctk.CTkButton(self, image=down_arrow_texture, text="", width=32, fg_color='transparent')
+        self.down_arrow_button.pack(side='right', fill='y')
+        self.down_arrow_button.bind('<Button-1>', viewer.shift_cell_down)
 
+        upper_arrow_texture = ctk.CTkImage(dark_image=Image.open('uppper_arrow.png'))
+        self.upper_arrow_button = ctk.CTkButton(self, image=upper_arrow_texture, text="", width=32, fg_color='transparent')
+        self.upper_arrow_button.pack(side='right', fill='y')
+        self.upper_arrow_button.bind('<Button-1>', viewer.shift_cell_up)
 
-class RightMenu(ctk.CTkFrame):
-    """
-    frame for some instruments from right side of application
-    """
+        image_texture = ctk.CTkImage(dark_image=Image.open('image.png'))
+        self.add_image_button = ctk.CTkButton(self, image=image_texture, text="", width=32, fg_color='transparent')
+        self.add_image_button.pack(side='right', fill='y')
 
-    def __init__(self, parent):
-        super().__init__(parent)
+        quiz_texture = ctk.CTkImage(dark_image=Image.open('quiz.png'))
+        self.add_quiz_button = ctk.CTkButton(self, image=quiz_texture, text="", width=32, fg_color='transparent')
+        self.add_quiz_button.pack(side='right', fill='y')
+
+        text_texture = ctk.CTkImage(dark_image=Image.open('text.png'))
+        self.add_text_button = ctk.CTkButton(self, image=text_texture, text="", width=32, fg_color='transparent')
+        self.add_text_button.pack(side='right', fill='y')
 
 
 class App(ctk.CTk):
@@ -486,24 +534,23 @@ class App(ctk.CTk):
     def __init__(self):
         self.window = super().__init__()
 
+        # gridding viewer
+        viewer_coords = (1, 0)
+        self.grid_columnconfigure(viewer_coords[1], weight=14)
+        self.grid_rowconfigure(viewer_coords[0], weight=50)
+        self.viewer = Viewer(self)
+        self.viewer.grid(row=viewer_coords[0], column=viewer_coords[1], sticky='SWEN')
+
         # gridding upper menu
         upper_menu_coords = (0, 0)
-        self.grid_rowconfigure(upper_menu_coords[0], weight=1)
+        self.grid_rowconfigure(upper_menu_coords[0], weight=2)
         self.grid_columnconfigure(upper_menu_coords[1], weight=1)
         self.upper_menu = UpperMenu(self)
         self.upper_menu.grid(row=upper_menu_coords[0], column=upper_menu_coords[1], columnspan=2, sticky='SWEN', pady=5)
 
-        # gridding side menu
-        side_menu_coords = (1, 1)
-        self.side_menu = RightMenu(self)
-        self.side_menu.grid(row=side_menu_coords[0], column=side_menu_coords[1], sticky='SWEN')
-
-        # gridding viewer
-        viewer_coords = (1, 0)
-        self.grid_columnconfigure(viewer_coords[1], weight=9)
-        self.grid_rowconfigure(viewer_coords[0], weight=50)
-        self.viewer = Viewer(self)
-        self.viewer.grid(row=viewer_coords[0], column=viewer_coords[1], sticky='SWEN')
+    def open_file(self):
+        filename = ctk.filedialog.askopenfilename()
+        print(filename)
 
 
 if __name__ == '__main__':
