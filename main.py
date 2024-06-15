@@ -128,8 +128,7 @@ class PlainTextCell(ctk.CTkFrame, Cell):
 
     def _edit_(self, event=None) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
         data = self.__data__
-        new_frame = ctk.CTkFrame(self, corner_radius=8, bor+
-                                 der_width=2)
+        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2)
         new_frame.columnconfigure(0, weight=1)
         new_frame.rowconfigure(0, weight=1)
 
@@ -172,7 +171,7 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         data = self.__data__
 
-        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500, height=300)
+        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, width=500, height=300)
         new_frame.columnconfigure(0, weight=1)
         self.view_frame = new_frame
         self.view_frame.pack(fill='both', expand=True)
@@ -223,9 +222,13 @@ class QuizCell(ctk.CTkFrame, Cell):
 
     def _edit_(self, event=None):
         if self.edit_frame:
-            self.edit_frame.pack_forget()
+            self.edit_frame.destroy()
+            self.edit_frame = None
+        if self.view_frame:
+            self.view_frame.destroy()
+            self.view_frame = None
 
-        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500, height=300)  # Adjust size as needed
+        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, width=500, height=300)  # Adjust size as needed
         self.edit_frame = new_frame
         self.edit_frame.pack(expand=True, fill='both')
 
