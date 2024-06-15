@@ -447,7 +447,6 @@ class UpperMenu(ctk.CTkFrame):
         self.add_text_button.pack(side='right', fill='y')
 
 
-
 class App(ctk.CTk):
 
     def __init__(self):
