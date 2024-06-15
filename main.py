@@ -340,8 +340,11 @@ class Viewer(ctk.CTkScrollableFrame):
                 "Yellow"
             ]
         })
-        self.cells: List[Cell] = [cell1, cell2]
 
+        cell3 = PlainTextCell(self, {
+            "text": "fdslfsdka;fdsk;fak;lk;la\njkdsfklsa"})
+
+        self.cells: List[Cell] = [cell1, cell2, cell3]
         self.__draw__()
 
     def __draw__(self):
@@ -358,6 +361,13 @@ class UpperMenu(ctk.CTkFrame):
 
     def __init__(self, parent):
         super().__init__(parent, height=75)
+        #self.add_buttons()
+
+    def add_buttons(self):
+        for col_n in range(4):
+            self.columnconfigure(col_n, weight=1)
+
+        self.add_cell_button = ctk.CTkButton()
 
 
 class RightMenu(ctk.CTkFrame):
