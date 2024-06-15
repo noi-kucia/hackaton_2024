@@ -348,77 +348,64 @@ class QuizCell(ctk.CTkFrame, Cell):
         result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 20), text_color=result_color)
         result_label.grid(row=len(self.answer_vars) + 2, column=0, pady=10)
 
+
 class FlashcardCell(ctk.CTkFrame, Cell):
     def __init__(self, parent, data):
         """
         :param data: {"front": <front side text>, "back": <back side text>}
         """
-        ctk.CTkFrame.__init__(self, parent)
-        self.parent = parent
+        super().__init__(parent, height=230)
         self.bind("<Double-Button-1>", self._edit_)
-        self.configure()
         self.__data__ = data
+
         self.view_frame = None
         self.edit_frame = None
-        self.showing_back = False  # Flag to track if currently showing back side
+        self.current_side = 'front'  # Flag to track if currently showing back side
+
         self._render_()  # Rendering data
         self._open_()  # Showing data
 
     def _import_(self) -> dict:
-        return {"cell_type": "image", "data": self.__data__}
+        return {"cell_type": "flash card", "data": self.__data__}
 
     def _render_(self):
-        if self.view_frame:
+
+        if self.view_frame:  # deleting old frame
             self.view_frame.destroy()
 
         data = self.__data__
 
-        new_frame = ctk.CTkFrame(self, corner_radius=8, width=500, height=300)
-        new_frame.columnconfigure(0, weight=1)
+        new_frame = ctk.CTkFrame(self, corner_radius=15, width=125, height=225, fg_color='#1A09AC')
         new_frame.bind("<Double-Button-1>", self._edit_)
+
         self.view_frame = new_frame
-        self.view_frame.grid(row=0, column=0, sticky='w')
+        self.view_frame.pack(fill='y', expand=True)
 
         # Display the front side text
         self.front_text = data["front"]
-        self.front_label = ctk.CTkLabel(new_frame, text=self.front_text, font=('Arial', 20))
-        self.front_label.grid(row=0, column=0, sticky='nsew', padx=10, pady=5)
+        self.front_label = ctk.CTkLabel(new_frame, text=self.front_text, font=('Arial', 20), width=125, height=225)
+        self.front_label.pack_forget()
+        self.front_label.bind('<Button-1>', self.flip)
 
         # Display the back side text (initially hidden)
         self.back_text = data["back"]
-        self.back_label = ctk.CTkLabel(new_frame, text=self.back_text, font=('Arial', 20))
-        self.back_label.grid(row=0, column=0, sticky='nsew', padx=10, pady=5)
-        self.back_label.grid_remove()  # Hide back side initially
+        self.back_label = ctk.CTkLabel(new_frame, text=self.back_text, font=('Arial', 20), width=125, height=225)
+        self.back_label.bind('<Button-1>', self.flip)
 
-        # Flip button in front side
-        self.flip_button_front = ctk.CTkButton(new_frame, text="Flip", command=self.flip)
-        self.flip_button_front.grid(row=1, column=0, pady=10, sticky='n')
+    def flip(self, event=None):
 
-        # Flip button in back side
-        self.flip_button_back = ctk.CTkButton(new_frame, text="Flip", command=self.flip)
-        self.flip_button_back.grid(row=1, column=0, pady=10, sticky='n')
-        self.flip_button_back.grid_remove()  # Hide back flip button initially
+        self.current_side = 'front' if self.current_side == 'back' else 'back'
+        if self.current_side == 'front':
+            self.front_label.pack_forget()
+            self.back_label.pack(fill='both', expand=True, padx=5, pady=5)
 
-    def flip(self):
-        self.showing_back = not self.showing_back
-        if self.showing_back:
-            self.front_label.grid_remove()
-            self.back_label.grid()
-            self.flip_button_front.grid_remove()
-            self.flip_button_back.grid()
         else:
-            self.back_label.grid_remove()
-            self.front_label.grid()
-            self.flip_button_back.grid_remove()
-            self.flip_button_front.grid()
+            self.back_label.pack_forget()
+            self.front_label.pack(fill='both', expand=True, padx=5, pady=5)
 
     def _open_(self):
-        self.showing_back = False
-        self.front_label.grid()
-        self.back_label.grid_remove()
-        self.flip_button_back.grid_remove()
-        self.flip_button_front.grid()
-        self.view_frame.tkraise()
+        self.current_side = 'front'
+        self.front_label.pack(fill='both', expand=True, padx=5, pady=5)
 
     def _edit_(self, event=None):
         if self.edit_frame:
@@ -429,14 +416,14 @@ class FlashcardCell(ctk.CTkFrame, Cell):
         self.edit_frame.pack(expand=True, fill='both')
 
         # Display editable front side text
-        front_label = ctk.CTkLabel(new_frame, text="Front Side:", font=('Arial', 16))
+        front_label = ctk.CTkLabel(new_frame, text="Front Side:", font=('Arial', 20))
         front_label.grid(row=0, column=0, sticky='W', padx=10, pady=5)
         front_entry = ctk.CTkEntry(new_frame, width=60)
         front_entry.insert(0, self.__data__["front"])
         front_entry.grid(row=0, column=1, padx=10, pady=5)
 
         # Display editable back side text
-        back_label = ctk.CTkLabel(new_frame, text="Back Side:", font=('Arial', 16))
+        back_label = ctk.CTkLabel(new_frame, text="Back Side:", font=('Arial', 20))
         back_label.grid(row=1, column=0, sticky='W', padx=10, pady=5)
         back_entry = ctk.CTkEntry(new_frame, width=60)
         back_entry.insert(0, self.__data__["back"])
@@ -496,7 +483,12 @@ class Viewer(ctk.CTkScrollableFrame):
 
 Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vitae nisl ante. Aenean non magna tempus, porttitor dolor nec, iaculis felis. Quisque convallis, nisl sit amet interdum iaculis, massa eros auctor erat, quis facilisis ipsum justo non leo. Nam laoreet, justo sit amet aliquet mattis, felis eros sagittis sapien, quis finibus est lacus vel ligula. Morbi eget suscipit massa. Nulla nec metus in ex egestas semper. Cras consequat felis non scelerisque iaculis. Pellentesque dictum dictum nulla, ut efficitur lorem tincidunt sit amet. Phasellus tempor placerat nisl et fermentum. Vestibulum maximus hendrerit leo id mattis. Nulla quis leo in est malesuada fringilla. Nunc dignissim aliquet lorem, eu varius augue imperdiet sit amet. Nam venenatis metus scelerisque bibendum malesuada. 
 """})
-        self.cells: List[Cell] = [cell1, cell2, cell3]
+        cell0 = FlashcardCell(self, {
+            "front": "front side text",
+            "back": "back side text\nXD"
+        })
+
+        self.cells: List[Cell] = [cell0, cell1, cell2, cell3]
         self.__draw__()
 
     def shift_cell_down(self, event=None):
@@ -509,7 +501,7 @@ Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vita
             return
         else:
             after.insert(1, self.selected_frame)
-        self.cells = before+after
+        self.cells = before + after
         self.__draw__()
 
     def shift_cell_up(self, event=None):
@@ -542,6 +534,8 @@ Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vita
 
     def save_file(self, event=None):
         filename = ctk.filedialog.asksaveasfile().name
+        if not filename:
+            return
 
         file_data = []
         for cell in self.cells:
@@ -563,7 +557,6 @@ class UpperMenu(ctk.CTkFrame):
         self.central_label.pack(fill='y', side='top', pady=(20, 0))
 
     def add_buttons(self):
-
         viewer = self.master.viewer
         app = self.master
 
@@ -582,12 +575,14 @@ class UpperMenu(ctk.CTkFrame):
         self.delete_button.pack(side='right', fill='y')
 
         down_arrow_texture = ctk.CTkImage(dark_image=Image.open('down_arrow.png'))
-        self.down_arrow_button = ctk.CTkButton(self, image=down_arrow_texture, text="", width=32, fg_color='transparent')
+        self.down_arrow_button = ctk.CTkButton(self, image=down_arrow_texture, text="", width=32,
+                                               fg_color='transparent')
         self.down_arrow_button.pack(side='right', fill='y')
         self.down_arrow_button.bind('<Button-1>', viewer.shift_cell_down)
 
         upper_arrow_texture = ctk.CTkImage(dark_image=Image.open('uppper_arrow.png'))
-        self.upper_arrow_button = ctk.CTkButton(self, image=upper_arrow_texture, text="", width=32, fg_color='transparent')
+        self.upper_arrow_button = ctk.CTkButton(self, image=upper_arrow_texture, text="", width=32,
+                                                fg_color='transparent')
         self.upper_arrow_button.pack(side='right', fill='y')
         self.upper_arrow_button.bind('<Button-1>', viewer.shift_cell_up)
 
@@ -625,6 +620,9 @@ class App(ctk.CTk):
 
     def open_file(self, event=None):
         filename = ctk.filedialog.askopenfilename()
+        if not filename:
+            return
+
         if not filename.split('.')[-1] == 'ibf':
             print('file must have .ibf extension')
             return
@@ -643,7 +641,7 @@ class App(ctk.CTk):
                         case 'plain text':
                             loaded_cells.append(PlainTextCell(self.viewer, cell_data))
                         case 'quiz':
-                            loaded_cells.append(QuizCell(self.viewer,cell_data))
+                            loaded_cells.append(QuizCell(self.viewer, cell_data))
 
                 # clearing viewer
                 for cell in self.viewer.cells:
