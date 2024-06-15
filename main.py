@@ -9,16 +9,24 @@ class Cell(ABC):
 
     every instance of this class must realize _open_ and _edit_ methods
     """
+
+    @abstractmethod
     def __init__(self):
-        pass
+        ...
 
     @abstractmethod
-    def _open_(self):
-        pass
+    def _open_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        """
+        :return: CTkFrame[Scrollable] object with rendered information ( rather not editable )
+        """
+        ...
 
     @abstractmethod
-    def _edit_(self):
-        pass
+    def _edit_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        """
+        :return:  CTkFrame[Scrollable] object allows to edit data in it
+        """
+        ...
 
 
 class Viewer(ctk.CTkScrollableFrame):
