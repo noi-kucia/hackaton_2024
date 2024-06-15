@@ -86,13 +86,12 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         pass
 
     def _edit_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
-        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, fg_color='#00FFAA')
+        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2)
         self.edit_frame = new_frame
         self.edit_frame.pack(expand=True, fill='x')
         self.edit_frame.tkraise()
 
 class QuizCell(ctk.CTkFrame, Cell):
-
     def __init__(self, parent, data):
         """
         :param data: {"text": <some text>, "answers": [<answer1>, <answer2>, ...], "correct_answers": [<correct1>, <correct2>, ...] }
@@ -104,15 +103,18 @@ class QuizCell(ctk.CTkFrame, Cell):
         self.edit_frame = None
         self.answer_vars = []
         self._render_()  # rendering data
-        self._open_()  # showing data
+        self._open_()    # showing data
 
     def _render_(self):
+        if self.view_frame:
+            self.view_frame.pack_forget()
+
         data = self.__data__
 
-        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2)
+        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500, height=300)
         new_frame.columnconfigure(0, weight=1)
         self.view_frame = new_frame
-        self.view_frame.pack()
+        self.view_frame.pack(fill='both', expand=True)
 
         # Display the question text
         question_text = data["text"]
@@ -121,27 +123,121 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         # Display the answers with checkboxes
         answers = data.get("answers", [])
+        self.answer_vars = []
         for idx, answer in enumerate(answers):
-            answer_var = ctk.StringVar()
+            answer_var = ctk.StringVar(value="")
             self.answer_vars.append(answer_var)
             answer_checkbox = ctk.CTkCheckBox(new_frame, text=answer, variable=answer_var, onvalue=answer, offvalue="")
-            answer_checkbox.grid(row=idx + 1, column=0, sticky='W', padx=20, pady=2)
+            answer_checkbox.grid(row=idx+1, column=0, sticky='W', padx=20, pady=2)
 
         # Add a button to check answers
         check_button = ctk.CTkButton(new_frame, text="Check Answer", command=self.check_answer)
         check_button.grid(row=len(answers) + 1, column=0, pady=10)
 
+        # Bind double-click event
+        new_frame.bind("<Double-Button-1>", self._edit_)
+
     def _open_(self):
         self.view_frame.tkraise()
 
     def _save_(self):
-        pass
+        # Save edited data
+        new_question_text = self.question_entry.get()
+        new_answers = []
+        new_correct_answers = []
 
-    def _edit_(self):
-        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, fg_color='#00FFAA')
+        for entry, checkbox in zip(self.answer_entries, self.correct_checkboxes):
+            answer = entry.get()
+            if answer:
+                new_answers.append(answer)
+                if checkbox.get():
+                    new_correct_answers.append(answer)
+
+        self.__data__['text'] = new_question_text
+        self.__data__['answers'] = new_answers
+        self.__data__['correct_answers'] = new_correct_answers
+
+        self.edit_frame.pack_forget()
+        self._render_()
+
+    def _edit_(self, event=None):
+        if self.edit_frame:
+            self.edit_frame.pack_forget()
+
+        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500, height=300)  # Adjust size as needed
         self.edit_frame = new_frame
-        self.edit_frame.pack(expand=True, fill='x')
-        self.edit_frame.tkraise()
+        self.edit_frame.pack(expand=True, fill='both')
+
+        # Display editable question
+        self.question_entry = ctk.CTkEntry(new_frame, width=400)
+        self.question_entry.insert(0, self.__data__['text'])
+        self.question_entry.grid(row=0, column=0, columnspan=3, padx=10, pady=5)
+
+        # Display editable answers
+        self.answer_entries = []
+        self.correct_checkboxes = []
+        answers = self.__data__.get("answers", [])
+        correct_answers = self.__data__.get("correct_answers", [])
+        for idx, answer in enumerate(answers):
+            self._add_answer_row(new_frame, idx, answer, answer in correct_answers)
+
+        # Add button to save changes
+        save_button = ctk.CTkButton(new_frame, text="Save", command=self._save_)
+        save_button.grid(row=len(answers) + 1, column=0, pady=10)
+
+        # Add button to add a new answer
+        add_answer_button = ctk.CTkButton(new_frame, text="Add Answer", command=self._add_new_answer)
+        add_answer_button.grid(row=len(answers) + 2, column=0, pady=10)
+
+    def _add_answer_row(self, frame, idx, answer_text='', is_correct=False):
+        answer_entry = ctk.CTkEntry(frame)
+        answer_entry.insert(0, answer_text)
+        answer_entry.grid(row=idx+1, column=0, padx=10, pady=2, sticky='W')
+        self.answer_entries.append(answer_entry)
+
+        correct_var = ctk.BooleanVar(value=is_correct)
+        correct_checkbox = ctk.CTkCheckBox(frame, variable=correct_var, text="Correct")
+        correct_checkbox.grid(row=idx+1, column=1, padx=10, pady=2, sticky='W')
+        self.correct_checkboxes.append(correct_checkbox)
+
+        # Add delete button for each answer
+        delete_button = ctk.CTkButton(frame, text="Delete", command=lambda: self._delete_answer_row(frame, idx))
+        delete_button.grid(row=idx+1, column=2, padx=10, pady=2, sticky='W')
+
+    def _delete_answer_row(self, frame, idx):
+        self.answer_entries[idx].grid_forget()
+        self.correct_checkboxes[idx].grid_forget()
+        self.answer_entries.pop(idx)
+        self.correct_checkboxes.pop(idx)
+
+        # Adjust remaining rows
+        for i in range(idx, len(self.answer_entries)):
+            self.answer_entries[i].grid_configure(row=i+1)
+            self.correct_checkboxes[i].grid_configure(row=i+1)
+
+        # Redraw the save and add answer buttons
+        self._redraw_save_and_add_buttons()
+
+    def _add_new_answer(self):
+        idx = len(self.answer_entries)
+        self._add_answer_row(self.edit_frame, idx)
+
+        # Redraw the save and add answer buttons
+        self._redraw_save_and_add_buttons()
+
+    def _redraw_save_and_add_buttons(self):
+        # Remove existing buttons
+        for widget in self.edit_frame.grid_slaves():
+            if int(widget.grid_info()["row"]) >= len(self.answer_entries) + 1:
+                widget.grid_forget()
+
+        # Add button to save changes
+        save_button = ctk.CTkButton(self.edit_frame, text="Save", command=self._save_)
+        save_button.grid(row=len(self.answer_entries) + 1, column=0, pady=10)
+
+        # Add button to add a new answer
+        add_answer_button = ctk.CTkButton(self.edit_frame, text="Add Answer", command=self._add_new_answer)
+        add_answer_button.grid(row=len(self.answer_entries) + 2, column=0, pady=10)
 
     def check_answer(self):
         # Get the selected answers
@@ -155,9 +251,8 @@ class QuizCell(ctk.CTkFrame, Cell):
             result_text = "Incorrect."
 
         # Display result
-        result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 20))
+        result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 16))
         result_label.grid(row=len(self.answer_vars) + 2, column=0, pady=10)
-
 class Viewer(ctk.CTkScrollableFrame):
 
     def __init__(self, parent):
