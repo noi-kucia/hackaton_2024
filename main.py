@@ -91,6 +91,72 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         self.edit_frame.pack(expand=True, fill='x')
         self.edit_frame.tkraise()
 
+class QuizCell(ctk.CTkFrame, Cell):
+
+    def __init__(self, parent, data):
+        """
+        :param data: {"text": <some text>, "answers": [<answer1>, <answer2>, ...], "correct_answers": [<correct1>, <correct2>, ...] }
+        """
+        super().__init__(parent)
+        self.configure()
+        self.__data__ = data
+        self.view_frame = None
+        self.edit_frame = None
+        self.answer_vars = []
+        self._render_()  # rendering data
+        self._open_()  # showing data
+
+    def _render_(self):
+        data = self.__data__
+
+        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2)
+        new_frame.columnconfigure(0, weight=1)
+        self.view_frame = new_frame
+        self.view_frame.pack()
+
+        # Display the question text
+        question_text = data["text"]
+        question_label = ctk.CTkLabel(new_frame, text=question_text, font=('Arial', 16))
+        question_label.grid(row=0, column=0, sticky='WE', padx=10, pady=5)
+
+        # Display the answers with checkboxes
+        answers = data.get("answers", [])
+        for idx, answer in enumerate(answers):
+            answer_var = ctk.StringVar()
+            self.answer_vars.append(answer_var)
+            answer_checkbox = ctk.CTkCheckBox(new_frame, text=answer, variable=answer_var, onvalue=answer, offvalue="")
+            answer_checkbox.grid(row=idx + 1, column=0, sticky='W', padx=20, pady=2)
+
+        # Add a button to check answers
+        check_button = ctk.CTkButton(new_frame, text="Check Answer", command=self.check_answer)
+        check_button.grid(row=len(answers) + 1, column=0, pady=10)
+
+    def _open_(self):
+        self.view_frame.tkraise()
+
+    def _save_(self):
+        pass
+
+    def _edit_(self):
+        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, fg_color='#00FFAA')
+        self.edit_frame = new_frame
+        self.edit_frame.pack(expand=True, fill='x')
+        self.edit_frame.tkraise()
+
+    def check_answer(self):
+        # Get the selected answers
+        selected_answers = [var.get() for var in self.answer_vars if var.get()]
+        correct_answers = self.__data__.get("correct_answers", [])
+
+        # Check if the selected answers match the correct answers
+        if set(selected_answers) == set(correct_answers):
+            result_text = "Correct!"
+        else:
+            result_text = "Incorrect."
+
+        # Display result
+        result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 20))
+        result_label.grid(row=len(self.answer_vars) + 2, column=0, pady=10)
 
 class Viewer(ctk.CTkScrollableFrame):
 
@@ -101,7 +167,21 @@ class Viewer(ctk.CTkScrollableFrame):
         # test cells
         cell1 = PlainTextCell(self, {"text": "some \nmultiline\ntext\t\t2131 ,kf ,kf kfjalfjl;kafjsdljl"})
 
-        self.cells: List[Cell] = [cell1]
+        cell2 = QuizCell(self, {
+        "text": "What are the primary colors?",
+        "answers": [
+            "Red",
+            "Green",
+            "Blue",
+            "Yellow"
+        ],
+        "correct_answers": [
+            "Red",
+            "Blue",
+            "Yellow"
+        ]
+    })
+        self.cells: List[Cell] = [cell1, cell2]
 
         self.__draw__()
 
