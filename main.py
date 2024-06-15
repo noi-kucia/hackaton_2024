@@ -3,7 +3,8 @@ import tkinter
 import customtkinter as ctk
 from typing import List, Tuple, Generator
 from abc import ABC, abstractmethod
-from PIL import Image
+from PIL import Image, ImageTk
+
 
 class Cell(ABC):
     """
@@ -15,9 +16,9 @@ class Cell(ABC):
     @abstractmethod
     def __init__(self, data):
         self.__data__: dict = data
-        self._render_()  # rendering data
         self.view_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = self._open_()  # showing data
         self.edit_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
+        self._render_()  # rendering data
         ...
 
     @abstractmethod
@@ -331,6 +332,76 @@ class QuizCell(ctk.CTkFrame, Cell):
         result_label.grid(row=len(self.answer_vars) + 2, column=0, pady=10)
 
 
+class ImageCell(ctk.CTkFrame, Cell):
+    """
+    A cell that manages images added through a button and displays them in a grid.
+    Inherits from the Cell base class and uses customtkinter for UI components.
+    """
+
+    def __init__(self, parent, data):
+        """
+        :param data: {"image_path": <path to image> }
+        """
+        super().__init__(self, parent)
+        Cell.__init__(self, data)
+        self.view_frame = None
+
+    def _render_(self):
+        # Create the view frame
+        if self.view_frame:
+            self.view_frame.pack_forget()
+
+        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500, height=300)
+        new_frame.columnconfigure(0, weight=1)
+        self.view_frame = new_frame
+
+        image_path = self.__data__.get("image_path")
+        if image_path:
+            image = Image.open(image_path)
+            image = image.resize((300, 300), Image.ANTIALIAS)
+            photo = ImageTk.PhotoImage(image)
+
+            self.image_label = ctk.CTkLabel(new_frame, image=photo)
+            self.image_label.image = photo  # keep a reference!
+            self.image_label.grid(row=0, column=0, pady=20)
+
+        new_frame.bind("<Double-Button-1>", self._edit_)
+        new_frame.pack(fill='both', expand=True)
+
+    def _open_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        if self.view_frame:
+            self.view_frame.tkraise()
+        return self.view_frame
+
+    def _edit_(self, event=None) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        if self.edit_frame:
+            self.edit_frame.pack_forget()
+
+        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, fg_color='#FFFFFF', width=500, height=300)
+        self.edit_frame = new_frame
+
+        add_image_button = ctk.CTkButton(new_frame, text="Add Image", command=self._open_file_dialog)
+        add_image_button.pack(pady=20)
+
+        save_button = ctk.CTkButton(new_frame, text="Save", command=self._save_)
+        save_button.pack(pady=10)
+
+        new_frame.pack(expand=True, fill='both')
+        return new_frame
+
+    def _open_file_dialog(self):
+        file_path = ctk.filedialog.askopenfilename(
+            filetypes=[("Image files", "*.jpg *.jpeg *.png *.gif *.bmp")]
+        )
+        if file_path:
+            self.__data__["image_path"] = file_path
+            self._render_()
+
+    def _save_(self):
+        # For this example, we don't have file saving logic, but it should save `self.__data__` to a file
+        print("Image saved with path:", self.__data__.get("image_path"))
+        self._render_()
+
 class Viewer(ctk.CTkScrollableFrame):
 
     def __init__(self, parent):
@@ -362,8 +433,8 @@ class Viewer(ctk.CTkScrollableFrame):
 
 Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vitae nisl ante. Aenean non magna tempus, porttitor dolor nec, iaculis felis. Quisque convallis, nisl sit amet interdum iaculis, massa eros auctor erat, quis facilisis ipsum justo non leo. Nam laoreet, justo sit amet aliquet mattis, felis eros sagittis sapien, quis finibus est lacus vel ligula. Morbi eget suscipit massa. Nulla nec metus in ex egestas semper. Cras consequat felis non scelerisque iaculis. Pellentesque dictum dictum nulla, ut efficitur lorem tincidunt sit amet. Phasellus tempor placerat nisl et fermentum. Vestibulum maximus hendrerit leo id mattis. Nulla quis leo in est malesuada fringilla. Nunc dignissim aliquet lorem, eu varius augue imperdiet sit amet. Nam venenatis metus scelerisque bibendum malesuada. 
 """})
-
-        self.cells: List[Cell] = [cell1, cell2, cell3]
+        cell4 = ImageCell(self, {"image_path": None})
+        self.cells: List[Cell] = [cell1, cell2, cell3, cell4]
         self.__draw__()
 
     def shift_cell_down(self, event=None):
@@ -420,6 +491,7 @@ class UpperMenu(ctk.CTkFrame):
         self.central_label.pack(fill='y', side='top', pady=(20, 0))
 
     def add_buttons(self):
+
         viewer = self.master.viewer
 
         load_texture = ctk.CTkImage(dark_image=Image.open('open.png'))
