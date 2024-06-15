@@ -3,7 +3,7 @@ import tkinter
 import customtkinter as ctk
 from typing import List, Tuple, Generator
 from abc import ABC, abstractmethod
-
+from PIL import Image
 
 class Cell(ABC):
     """
@@ -361,13 +361,19 @@ class UpperMenu(ctk.CTkFrame):
 
     def __init__(self, parent):
         super().__init__(parent, height=75)
-        #self.add_buttons()
+        self.add_buttons()
 
     def add_buttons(self):
         for col_n in range(4):
             self.columnconfigure(col_n, weight=1)
 
-        self.add_cell_button = ctk.CTkButton()
+        upper_arrow_texture = ctk.CTkImage(dark_image=Image.open('uppper_arrow.png'))
+        self.upper_arrow_button = ctk.CTkButton(self, image=upper_arrow_texture, text="", width=28, fg_color='transparent')
+        self.upper_arrow_button.grid(row=0, column=0, padx=5, pady=5)
+
+        down_arrow_texture = ctk.CTkImage(dark_image=Image.open('down_arrow.png'))
+        self.down_arrow_button = ctk.CTkButton(self, image=down_arrow_texture, text="", width=28, fg_color='transparent')
+        self.down_arrow_button.grid(row=0, column=1, padx=5, pady=5)
 
 
 class RightMenu(ctk.CTkFrame):
