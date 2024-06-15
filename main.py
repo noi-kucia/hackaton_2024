@@ -416,9 +416,19 @@ class UpperMenu(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent, height=75)
         self.add_buttons()
+        self.central_label = ctk.CTkLabel(self, text='Open-IBF', font=('Arial', 24))
+        self.central_label.pack(fill='y', side='top', pady=(20, 0))
 
     def add_buttons(self):
         viewer = self.master.viewer
+
+        load_texture = ctk.CTkImage(dark_image=Image.open('open.png'))
+        self.open_button = ctk.CTkButton(self, image=load_texture, text="", width=32, fg_color='transparent')
+        self.open_button.pack(side='left', fill='y')
+
+        save_texture = ctk.CTkImage(dark_image=Image.open('save.png'))
+        self.save_button = ctk.CTkButton(self, image=save_texture, text="", width=32, fg_color='transparent')
+        self.save_button.pack(side='left', fill='y')
 
         trash_bin_texture = ctk.CTkImage(dark_image=Image.open('trash_bin.png'))
         self.delete_button = ctk.CTkButton(self, image=trash_bin_texture, text="", width=32, fg_color='transparent')
@@ -465,6 +475,10 @@ class App(ctk.CTk):
         self.grid_columnconfigure(upper_menu_coords[1], weight=1)
         self.upper_menu = UpperMenu(self)
         self.upper_menu.grid(row=upper_menu_coords[0], column=upper_menu_coords[1], columnspan=2, sticky='SWEN', pady=5)
+
+    def open_file(self):
+        filename = ctk.filedialog.askopenfilename()
+        print(filename)
 
 
 if __name__ == '__main__':
