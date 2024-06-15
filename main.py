@@ -156,4 +156,5 @@ class App(ctk.CTk):
 if __name__ == '__main__':
     window = App()
     window.title("hackaton")
+    window.minsize(720, 480)
     window.mainloop()
