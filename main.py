@@ -53,12 +53,13 @@ class Cell(ABC):
         ...
 
 
-class PlainTextCell(Cell, ABC):
+class PlainTextCell(ctk.CTkFrame, Cell):
 
-    def __init__(self, data):
+    def __init__(self, parent, data):
         """
         :param data: {"text": <some text> }
         """
+        super().__init__(parent)
         self.__data__: dict = data
         self.view_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
         self.edit_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
@@ -73,15 +74,19 @@ class PlainTextCell(Cell, ABC):
         self.view_frame.pack()
 
         text = data["text"]
-        text_frame = ctk.CTkLabel(text=text, font=('Arial', 16))
+        text_frame = ctk.CTkLabel(new_frame, text=text, font=('Arial', 16))
+        text_frame.pack(fill='both', expand=True)
 
     def _open_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
         self.view_frame.tkraise()
 
+    def _save_(self):
+        pass
+
     def _edit_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
         new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, fg_color='#00FFAA')
         self.edit_frame = new_frame
-        self.edit_frame.pack()
+        self.edit_frame.pack(expand=True, fill='x')
         self.edit_frame.tkraise()
 
 
@@ -89,8 +94,18 @@ class Viewer(ctk.CTkScrollableFrame):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.columnconfigure(0, weight=1)
 
-        self.cells: List[Cell] = []
+        # test cells
+        cell1 = PlainTextCell(self, {"text": "some \nmultiline\ntext\t\t2131"})
+
+        self.cells: List[Cell] = [cell1]
+
+        self.__draw__()
+
+    def __draw__(self):
+        for cell_num, cell in enumerate(self.cells):
+            cell.grid(row=cell_num, column=0, sticky='WE')
 
 
 class UpperMenu(ctk.CTkFrame):
