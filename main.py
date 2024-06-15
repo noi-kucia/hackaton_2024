@@ -1,3 +1,5 @@
+import tkinter
+
 import customtkinter as ctk
 from typing import List, Tuple, Generator
 from abc import ABC, abstractmethod
@@ -73,26 +75,52 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2)
         new_frame.columnconfigure(0, weight=1)
         new_frame.rowconfigure(0, weight=1)
+
+        if self.view_frame:
+            self.view_frame.destroy()
+            self.view_frame = None
         self.view_frame = new_frame
-        self.view_frame.pack(fill='both', expand=True, side=ctk.LEFT)
+        self.view_frame.pack(fill='both', side='top', expand=True)
 
         text = data["text"]
         text_frame = ctk.CTkLabel(new_frame, text=text, font=('Arial', 20), compound='left')
         text_frame.grid(row=0, column=0, sticky='NSEW')
+        text_frame.bind('<Double-Button-1>', self._edit_)
 
-    def _open_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+    def _open_(self, event=None) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        # if self.edit_frame:
+        #     self.edit_frame.destroy()
+        if not self.view_frame:
+            self._render_()
+        if self.edit_frame:
+            self.edit_frame.destroy()
+            self.edit_frame = None
         self.view_frame.tkraise()
 
     def _save_(self):
         pass
 
-    def _edit_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
-        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, fg_color='#00FFAA')
+    def _edit_(self, event=None) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        data = self.__data__
+        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2)
+        new_frame.columnconfigure(0, weight=1)
+        new_frame.rowconfigure(0, weight=1)
+
+        if self.edit_frame:
+            self.edit_frame.destroy()
+            self.edit_frame = None
+        if self.view_frame:
+            self.view_frame.destroy()
+            self.view_frame = None
         self.edit_frame = new_frame
-        self.edit_frame.pack(expand=True, fill='x')
+        self.edit_frame.pack(fill='both', expand=True, side='top')
+
+        entry_frame = ctk.CTkTextbox(new_frame, font=('Arial', 20))
+        entry_frame.insert('0.0', data["text"])
+        entry_frame.grid(row=0, column=0, sticky='NSEW')
+        entry_frame.bind('<Shift-Return>', self._open_)
+
         self.edit_frame.tkraise()
-
-
 
 
 class Viewer(ctk.CTkScrollableFrame):
@@ -112,7 +140,6 @@ class Viewer(ctk.CTkScrollableFrame):
             self.columnconfigure(0, weight=99)
             self.rowconfigure(0, weight=99)
             cell.grid(row=cell_num, column=0, sticky='WE')
-
 
 
 class UpperMenu(ctk.CTkFrame):
