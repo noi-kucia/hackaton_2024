@@ -348,79 +348,121 @@ class QuizCell(ctk.CTkFrame, Cell):
         result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 20), text_color=result_color)
         result_label.grid(row=len(self.answer_vars) + 2, column=0, pady=10)
 
-
-class ImageCell(ctk.CTkFrame, Cell):
-    """
-    A cell that manages images added through a button and displays them in a grid.
-    Inherits from the Cell base class and uses customtkinter for UI components.
-    """
-
+class FlashcardCell(ctk.CTkFrame, Cell):
     def __init__(self, parent, data):
         """
-        :param data: {"image_path": <path to image> }
+        :param data: {"front": <front side text>, "back": <back side text>}
         """
-        super().__init__(self, parent)
-        Cell.__init__(self, data)
+        ctk.CTkFrame.__init__(self, parent)
+        self.parent = parent
+        self.bind("<Double-Button-1>", self._edit_)
+        self.configure()
+        self.__data__ = data
         self.view_frame = None
+        self.edit_frame = None
+        self.showing_back = False  # Flag to track if currently showing back side
+        self._render_()  # Rendering data
+        self._open_()  # Showing data
 
     def _import_(self) -> dict:
         return {"cell_type": "image", "data": self.__data__}
 
     def _render_(self):
-        # Create the view frame
         if self.view_frame:
-            self.view_frame.pack_forget()
+            self.view_frame.destroy()
 
-        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500, height=300)
+        data = self.__data__
+
+        new_frame = ctk.CTkFrame(self, corner_radius=8, width=500, height=300)
         new_frame.columnconfigure(0, weight=1)
-        self.view_frame = new_frame
-
-        image_path = self.__data__.get("image_path")
-        if image_path:
-            image = Image.open(image_path)
-            image = image.resize((300, 300), Image.ANTIALIAS)
-            photo = ImageTk.PhotoImage(image)
-
-            self.image_label = ctk.CTkLabel(new_frame, image=photo)
-            self.image_label.image = photo  # keep a reference!
-            self.image_label.grid(row=0, column=0, pady=20)
-
         new_frame.bind("<Double-Button-1>", self._edit_)
-        new_frame.pack(fill='both', expand=True)
+        self.view_frame = new_frame
+        self.view_frame.grid(row=0, column=0, sticky='w')
 
-    def _open_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
-        if self.view_frame:
-            self.view_frame.tkraise()
-        return self.view_frame
+        # Display the front side text
+        self.front_text = data["front"]
+        self.front_label = ctk.CTkLabel(new_frame, text=self.front_text, font=('Arial', 20))
+        self.front_label.grid(row=0, column=0, sticky='nsew', padx=10, pady=5)
 
-    def _edit_(self, event=None) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        # Display the back side text (initially hidden)
+        self.back_text = data["back"]
+        self.back_label = ctk.CTkLabel(new_frame, text=self.back_text, font=('Arial', 20))
+        self.back_label.grid(row=0, column=0, sticky='nsew', padx=10, pady=5)
+        self.back_label.grid_remove()  # Hide back side initially
+
+        # Flip button in front side
+        self.flip_button_front = ctk.CTkButton(new_frame, text="Flip", command=self.flip)
+        self.flip_button_front.grid(row=1, column=0, pady=10, sticky='n')
+
+        # Flip button in back side
+        self.flip_button_back = ctk.CTkButton(new_frame, text="Flip", command=self.flip)
+        self.flip_button_back.grid(row=1, column=0, pady=10, sticky='n')
+        self.flip_button_back.grid_remove()  # Hide back flip button initially
+
+    def flip(self):
+        self.showing_back = not self.showing_back
+        if self.showing_back:
+            self.front_label.grid_remove()
+            self.back_label.grid()
+            self.flip_button_front.grid_remove()
+            self.flip_button_back.grid()
+        else:
+            self.back_label.grid_remove()
+            self.front_label.grid()
+            self.flip_button_back.grid_remove()
+            self.flip_button_front.grid()
+
+    def _open_(self):
+        self.showing_back = False
+        self.front_label.grid()
+        self.back_label.grid_remove()
+        self.flip_button_back.grid_remove()
+        self.flip_button_front.grid()
+        self.view_frame.tkraise()
+
+    def _edit_(self, event=None):
         if self.edit_frame:
             self.edit_frame.pack_forget()
 
-        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, fg_color='#FFFFFF', width=500, height=300)
+        new_frame = ctk.CTkScrollableFrame(self.parent, corner_radius=8, border_width=2, width=500, height=300)
         self.edit_frame = new_frame
+        self.edit_frame.pack(expand=True, fill='both')
 
-        add_image_button = ctk.CTkButton(new_frame, text="Add Image", command=self._open_file_dialog)
-        add_image_button.pack(pady=20)
+        # Display editable front side text
+        front_label = ctk.CTkLabel(new_frame, text="Front Side:", font=('Arial', 16))
+        front_label.grid(row=0, column=0, sticky='W', padx=10, pady=5)
+        front_entry = ctk.CTkEntry(new_frame, width=60)
+        front_entry.insert(0, self.__data__["front"])
+        front_entry.grid(row=0, column=1, padx=10, pady=5)
 
-        save_button = ctk.CTkButton(new_frame, text="Save", command=self._save_)
-        save_button.pack(pady=10)
+        # Display editable back side text
+        back_label = ctk.CTkLabel(new_frame, text="Back Side:", font=('Arial', 16))
+        back_label.grid(row=1, column=0, sticky='W', padx=10, pady=5)
+        back_entry = ctk.CTkEntry(new_frame, width=60)
+        back_entry.insert(0, self.__data__["back"])
+        back_entry.grid(row=1, column=1, padx=10, pady=5)
 
-        new_frame.pack(expand=True, fill='both')
-        return new_frame
+        # Save button
+        save_button = ctk.CTkButton(new_frame, text="Save",
+                                    command=lambda: self._save_(front_entry.get(), back_entry.get()))
+        save_button.grid(row=2, column=0, columnspan=2, pady=10)
 
-    def _open_file_dialog(self):
-        file_path = ctk.filedialog.askopenfilename(
-            filetypes=[("Image files", "*.jpg *.jpeg *.png *.gif *.bmp")]
-        )
-        if file_path:
-            self.__data__["image_path"] = file_path
-            self._render_()
+        # Delete button
+        delete_button = ctk.CTkButton(new_frame, text="Delete", command=self._delete_)
+        delete_button.grid(row=3, column=0, columnspan=2, pady=10)
 
-    def _save_(self):
-        # For this example, we don't have file saving logic, but it should save `self.__data__` to a file
-        print("Image saved with path:", self.__data__.get("image_path"))
+    def _save_(self, new_front, new_back):
+        self.__data__["front"] = new_front
+        self.__data__["back"] = new_back
+        if self.edit_frame:
+            self.edit_frame.destroy()
         self._render_()
+        self._open_()
+
+    def _delete_(self):
+        self.parent.remove_flashcard(self)
+        if self.edit_frame:
+            self.edit_frame.destroy()
 
 
 class Viewer(ctk.CTkScrollableFrame):
