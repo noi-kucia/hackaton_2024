@@ -67,7 +67,7 @@ class AutoWrappingCTkLabel(ctk.CTkLabel):
         self.update_wraplength()
 
     def update_wraplength(self):
-        current_width = int(self.winfo_width() / 1.25)
+        current_width = int(self.winfo_width() / 1.6)
         if current_width > 1:  # Avoid wraplength of 0
             self.configure(wraplength=current_width)
 
@@ -156,7 +156,7 @@ class QuizCell(ctk.CTkFrame, Cell):
         """
         :param data: {"text": <some text>, "answers": [<answer1>, <answer2>, ...], "correct_answers": [<correct1>, <correct2>, ...] }
         """
-        super().__init__(parent)
+        super().__init__(parent, border_width=0)
         self.configure()
         self.__data__ = data
         self.view_frame = None
@@ -171,7 +171,7 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         data = self.__data__
 
-        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, width=500, height=300)
+        new_frame = ctk.CTkFrame(self, corner_radius=8, width=500, height=300)
         new_frame.columnconfigure(0, weight=1)
         self.view_frame = new_frame
         self.view_frame.pack(fill='both', expand=True)
@@ -320,6 +320,7 @@ class Viewer(ctk.CTkScrollableFrame):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.selected_frame: ctk.CTkFrame = None  # curently selected frame
 
         # test cells
         cell1 = PlainTextCell(self, {
@@ -355,6 +356,12 @@ Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vita
             self.columnconfigure(0, weight=99)
             self.rowconfigure(0, weight=99)
             cell.grid(row=cell_num, column=0, sticky='WE', pady=5)
+
+    def select_frame(self, frame: ctk.CTkFrame):
+        # unselect previous one ( delete boarding)
+
+        frame.configure(border_width=2, border_color='#5584e0')
+        pass
 
 
 class UpperMenu(ctk.CTkFrame):
