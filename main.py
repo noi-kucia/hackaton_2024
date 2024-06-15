@@ -433,8 +433,7 @@ class Viewer(ctk.CTkScrollableFrame):
 
 Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vitae nisl ante. Aenean non magna tempus, porttitor dolor nec, iaculis felis. Quisque convallis, nisl sit amet interdum iaculis, massa eros auctor erat, quis facilisis ipsum justo non leo. Nam laoreet, justo sit amet aliquet mattis, felis eros sagittis sapien, quis finibus est lacus vel ligula. Morbi eget suscipit massa. Nulla nec metus in ex egestas semper. Cras consequat felis non scelerisque iaculis. Pellentesque dictum dictum nulla, ut efficitur lorem tincidunt sit amet. Phasellus tempor placerat nisl et fermentum. Vestibulum maximus hendrerit leo id mattis. Nulla quis leo in est malesuada fringilla. Nunc dignissim aliquet lorem, eu varius augue imperdiet sit amet. Nam venenatis metus scelerisque bibendum malesuada. 
 """})
-        # cell4 = ImageCell(self, {"image_path": None})
-        self.cells: List[Cell] = [cell1, cell2, cell3, cell4]
+        self.cells: List[Cell] = [cell1, cell2, cell3,]
         self.__draw__()
 
     def shift_cell_down(self, event=None):
