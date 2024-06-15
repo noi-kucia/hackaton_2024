@@ -68,7 +68,6 @@ class AutoWrappingCTkLabel(ctk.CTkLabel):
 
     def update_wraplength(self):
         current_width = int(self.winfo_width() / 1.25)
-        print(current_width)
         if current_width > 1:  # Avoid wraplength of 0
             self.configure(wraplength=current_width)
 
@@ -324,7 +323,7 @@ class Viewer(ctk.CTkScrollableFrame):
 
         # test cells
         cell1 = PlainTextCell(self, {
-            "text": "some \nmultiline\ntext\t\t2131 ,kf ,kf kfjalfjl;kafjsdljlkfdjalkfjds;lkfsadkljds;lkfjds;lkaj;dslkjds;lkfajsde;lkjsdf;l'jfkalfskdl"})
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ac sollicitudin eros. Duis vitae arcu maximus, congue enim et, pretium lorem. Sed mauris nisi, pharetra id cursus nec, viverra ut diam. Proin scelerisque molestie turpis, sit amet posuere nisl mattis at. Donec in aliquam massa. Pellentesque ullamcorper scelerisque consectetur. Phasellus blandit massa ex, vel molestie sem malesuada vitae. Mauris euismod egestas mi, nec cursus mi accumsan non. Etiam odio dui, ornare nec iaculis eu, ullamcorper at lorem. Vestibulum tristique, massa et auctor dictum, sem lorem viverra massa, in fringilla velit nisi a diam. Vivamus pharetra placerat ligula, quis congue sem suscipit eget. Donec ullamcorper, leo nec laoreet hendrerit, ligula nisl egestas lacus, id scelerisque tortor justo vel metus. Quisque at dui at diam aliquet lobortis ac in nunc. Sed in tincidunt massa, eget volutpat ipsum. Integer tincidunt eleifend gravida. "})
 
         cell2 = QuizCell(self, {
             "text": "What are the primary colors?",
@@ -342,7 +341,11 @@ class Viewer(ctk.CTkScrollableFrame):
         })
 
         cell3 = PlainTextCell(self, {
-            "text": "fdslfsdka;fdsk;fak;lk;la\njkdsfklsa"})
+            "text": """
+             Donec quis convallis metus. Fusce varius malesuada mollis. Nam bibendum lectus non diam molestie dapibus. Phasellus at vehicula enim. Etiam blandit vehicula lorem vitae aliquet. Sed ac finibus purus, ac ornare dolor. Nunc consectetur porta velit, a hendrerit orci varius a. Maecenas lacinia venenatis hendrerit. Vestibulum non orci porta, accumsan sem vel, mattis purus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vitae nisl ante. Aenean non magna tempus, porttitor dolor nec, iaculis felis. Quisque convallis, nisl sit amet interdum iaculis, massa eros auctor erat, quis facilisis ipsum justo non leo. Nam laoreet, justo sit amet aliquet mattis, felis eros sagittis sapien, quis finibus est lacus vel ligula. Morbi eget suscipit massa. Nulla nec metus in ex egestas semper. Cras consequat felis non scelerisque iaculis. Pellentesque dictum dictum nulla, ut efficitur lorem tincidunt sit amet. Phasellus tempor placerat nisl et fermentum. Vestibulum maximus hendrerit leo id mattis. Nulla quis leo in est malesuada fringilla. Nunc dignissim aliquet lorem, eu varius augue imperdiet sit amet. Nam venenatis metus scelerisque bibendum malesuada. 
+"""})
 
         self.cells: List[Cell] = [cell1, cell2, cell3]
         self.__draw__()
