@@ -16,7 +16,7 @@ class Cell(ABC):
     def __init__(self, data):
         self.__data__: dict = data
         self._render_()  # rendering data
-        self.view_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = self._open_()    # showing data
+        self.view_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = self._open_()  # showing data
         self.edit_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
         ...
 
@@ -67,7 +67,7 @@ class AutoWrappingCTkLabel(ctk.CTkLabel):
         self.update_wraplength()
 
     def update_wraplength(self):
-        current_width = int(self.winfo_width()/1.25)
+        current_width = int(self.winfo_width() / 1.25)
         print(current_width)
         if current_width > 1:  # Avoid wraplength of 0
             self.configure(wraplength=current_width)
@@ -90,7 +90,7 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         self.view_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
         self.edit_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
         self._render_()  # rendering data
-        self._open_()    # showing data
+        self._open_()  # showing data
 
     def _render_(self):
         data = self.__data__
@@ -125,7 +125,6 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         self.__data__["text"] = new_text
         print("don't forget to save into file")
 
-
     def _edit_(self, event=None) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
         data = self.__data__
         new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2)
@@ -144,12 +143,14 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         def exit_edit_mode(event=None):
             self._save_()
             self._open_()
+
         self.entry_frame = ctk.CTkTextbox(new_frame, font=('Arial', 20), wrap='word')
         self.entry_frame.insert('0.0', data["text"])
         self.entry_frame.grid(row=0, column=0, sticky='NSEW')
         self.entry_frame.bind('<Shift-Return>', exit_edit_mode)
 
         self.edit_frame.tkraise()
+
 
 class QuizCell(ctk.CTkFrame, Cell):
     def __init__(self, parent, data):
@@ -163,7 +164,7 @@ class QuizCell(ctk.CTkFrame, Cell):
         self.edit_frame = None
         self.answer_vars = []
         self._render_()  # rendering data
-        self._open_()    # showing data
+        self._open_()  # showing data
 
     def _render_(self):
         if self.view_frame:
@@ -171,7 +172,7 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         data = self.__data__
 
-        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, width=500, height=300)
+        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500, height=300)
         new_frame.columnconfigure(0, weight=1)
         self.view_frame = new_frame
         self.view_frame.pack(fill='both', expand=True)
@@ -188,7 +189,7 @@ class QuizCell(ctk.CTkFrame, Cell):
             answer_var = ctk.StringVar(value="")
             self.answer_vars.append(answer_var)
             answer_checkbox = ctk.CTkCheckBox(new_frame, text=answer, variable=answer_var, onvalue=answer, offvalue="")
-            answer_checkbox.grid(row=idx+1, column=0, sticky='W', padx=20, pady=2)
+            answer_checkbox.grid(row=idx + 1, column=0, sticky='W', padx=20, pady=2)
 
         # Add a button to check answers
         check_button = ctk.CTkButton(new_frame, text="Check Answer", command=self.check_answer)
@@ -222,13 +223,10 @@ class QuizCell(ctk.CTkFrame, Cell):
 
     def _edit_(self, event=None):
         if self.edit_frame:
-            self.edit_frame.destroy()
-            self.edit_frame = None
-        if self.view_frame:
-            self.view_frame.destroy()
-            self.view_frame = None
+            self.edit_frame.pack_forget()
 
-        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, width=500, height=300)  # Adjust size as needed
+        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500,
+                                           height=300)  # Adjust size as needed
         self.edit_frame = new_frame
         self.edit_frame.pack(expand=True, fill='both')
 
@@ -256,17 +254,17 @@ class QuizCell(ctk.CTkFrame, Cell):
     def _add_answer_row(self, frame, idx, answer_text='', is_correct=False):
         answer_entry = ctk.CTkEntry(frame)
         answer_entry.insert(0, answer_text)
-        answer_entry.grid(row=idx+1, column=0, padx=10, pady=2, sticky='W')
+        answer_entry.grid(row=idx + 1, column=0, padx=10, pady=2, sticky='W')
         self.answer_entries.append(answer_entry)
 
         correct_var = ctk.BooleanVar(value=is_correct)
         correct_checkbox = ctk.CTkCheckBox(frame, variable=correct_var, text="Correct")
-        correct_checkbox.grid(row=idx+1, column=1, padx=10, pady=2, sticky='W')
+        correct_checkbox.grid(row=idx + 1, column=1, padx=10, pady=2, sticky='W')
         self.correct_checkboxes.append(correct_checkbox)
 
         # Add delete button for each answer
         delete_button = ctk.CTkButton(frame, text="Delete", command=lambda: self._delete_answer_row(frame, idx))
-        delete_button.grid(row=idx+1, column=2, padx=10, pady=2, sticky='W')
+        delete_button.grid(row=idx + 1, column=2, padx=10, pady=2, sticky='W')
 
     def _delete_answer_row(self, frame, idx):
         self.answer_entries[idx].grid_forget()
@@ -276,8 +274,8 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         # Adjust remaining rows
         for i in range(idx, len(self.answer_entries)):
-            self.answer_entries[i].grid_configure(row=i+1)
-            self.correct_checkboxes[i].grid_configure(row=i+1)
+            self.answer_entries[i].grid_configure(row=i + 1)
+            self.correct_checkboxes[i].grid_configure(row=i + 1)
 
         # Redraw the save and add answer buttons
         self._redraw_save_and_add_buttons()
@@ -317,28 +315,31 @@ class QuizCell(ctk.CTkFrame, Cell):
         # Display result
         result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 16))
         result_label.grid(row=len(self.answer_vars) + 2, column=0, pady=10)
+
+
 class Viewer(ctk.CTkScrollableFrame):
 
     def __init__(self, parent):
         super().__init__(parent)
 
         # test cells
-        cell1 = PlainTextCell(self, {"text": "some \nmultiline\ntext\t\t2131 ,kf ,kf kfjalfjl;kafjsdljlkfdjalkfjds;lkfsadkljds;lkfjds;lkaj;dslkjds;lkfajsde;lkjsdf;l'jfkalfskdl"})
+        cell1 = PlainTextCell(self, {
+            "text": "some \nmultiline\ntext\t\t2131 ,kf ,kf kfjalfjl;kafjsdljlkfdjalkfjds;lkfsadkljds;lkfjds;lkaj;dslkjds;lkfajsde;lkjsdf;l'jfkalfskdl"})
 
         cell2 = QuizCell(self, {
-        "text": "What are the primary colors?",
-        "answers": [
-            "Red",
-            "Green",
-            "Blue",
-            "Yellow"
-        ],
-        "correct_answers": [
-            "Red",
-            "Blue",
-            "Yellow"
-        ]
-    })
+            "text": "What are the primary colors?",
+            "answers": [
+                "Red",
+                "Green",
+                "Blue",
+                "Yellow"
+            ],
+            "correct_answers": [
+                "Red",
+                "Blue",
+                "Yellow"
+            ]
+        })
         self.cells: List[Cell] = [cell1, cell2]
 
         self.__draw__()
@@ -347,7 +348,7 @@ class Viewer(ctk.CTkScrollableFrame):
         for cell_num, cell in enumerate(self.cells):
             self.columnconfigure(0, weight=99)
             self.rowconfigure(0, weight=99)
-            cell.grid(row=cell_num, column=0, sticky='WE')
+            cell.grid(row=cell_num, column=0, sticky='WE', pady=5)
 
 
 class UpperMenu(ctk.CTkFrame):
