@@ -84,12 +84,17 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         :param data: {"text": <some text> }
         """
         super().__init__(parent)
+        self.root = parent
+
         self.configure()
         self.__data__: dict = data
         self.view_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
         self.edit_frame: [ctk.CTkFrame, ctk.CTkScrollableFrame] = None
         self._render_()  # rendering data
         self._open_()  # showing data
+
+    def on_click(self, event=None):
+        self.root.select_frame(self)
 
     def _render_(self):
         data = self.__data__
@@ -102,12 +107,13 @@ class PlainTextCell(ctk.CTkFrame, Cell):
             self.view_frame.destroy()
             self.view_frame = None
         self.view_frame = new_frame
-        self.view_frame.pack(fill='both')
+        self.view_frame.pack(fill='both', padx=2, pady=2)
 
         text = data["text"]
         text_frame = AutoWrappingCTkLabel(master=new_frame, text=text, font=('Arial', 20), justify='left')
         text_frame.grid(row=0, column=0, sticky='NSEW')
         text_frame.bind('<Double-Button-1>', self._edit_)
+        text_frame.bind("<Button-1>", self.on_click)
 
     def _open_(self, event=None) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
         # if self.edit_frame:
@@ -156,7 +162,8 @@ class QuizCell(ctk.CTkFrame, Cell):
         """
         :param data: {"text": <some text>, "answers": [<answer1>, <answer2>, ...], "correct_answers": [<correct1>, <correct2>, ...] }
         """
-        super().__init__(parent, border_width=0)
+        super().__init__(parent)
+        self.bind("<Button-1>", self.on_click)
         self.configure()
         self.__data__ = data
         self.view_frame = None
@@ -164,6 +171,9 @@ class QuizCell(ctk.CTkFrame, Cell):
         self.answer_vars = []
         self._render_()  # rendering data
         self._open_()  # showing data
+
+    def on_click(self, event=None):
+        self.master.select_frame(self)
 
     def _render_(self):
         if self.view_frame:
@@ -173,12 +183,14 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         new_frame = ctk.CTkFrame(self, corner_radius=8, width=500, height=300)
         new_frame.columnconfigure(0, weight=1)
+        new_frame.bind("<Button-1>", self.on_click)
         self.view_frame = new_frame
-        self.view_frame.pack(fill='both', expand=True)
+        self.view_frame.pack(fill='both', expand=True, pady=2, padx=2)
 
         # Display the question text
         question_text = data["text"]
         question_label = ctk.CTkLabel(new_frame, text=question_text, font=('Arial', 20))
+        question_label.bind("<Button-1>", self.on_click)
         question_label.grid(row=0, column=0, sticky='WE', padx=10, pady=5)
 
         # Display the answers with checkboxes
@@ -224,7 +236,7 @@ class QuizCell(ctk.CTkFrame, Cell):
         if self.edit_frame:
             self.edit_frame.pack_forget()
 
-        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=300,
+        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500,
                                            height=300)  # Adjust size as needed
         self.edit_frame = new_frame
         self.edit_frame.pack(expand=True, fill='both')
@@ -307,14 +319,12 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         # Check if the selected answers match the correct answers
         if set(selected_answers) == set(correct_answers):
-            result_text = "Correct!!!"
-            result_color = '#00FF00'
+            result_text = "Correct!"
         else:
-            result_text = "Incorrect!"
-            result_color = '#FF0000'
+            result_text = "Incorrect."
 
         # Display result
-        result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 20), text_color=result_color)
+        result_label = ctk.CTkLabel(self.view_frame, text=result_text, font=('Arial', 16))
         result_label.grid(row=len(self.answer_vars) + 2, column=0, pady=10)
 
 
@@ -322,7 +332,7 @@ class Viewer(ctk.CTkScrollableFrame):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.selected_frame: ctk.CTkFrame = None  # curently selected frame
+        self.selected_frame: ctk.CTkFrame = None  # currently selected frame
 
         # test cells
         cell1 = PlainTextCell(self, {
@@ -360,7 +370,9 @@ Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vita
             cell.grid(row=cell_num, column=0, sticky='WE', pady=5)
 
     def select_frame(self, frame: ctk.CTkFrame):
-        # unselect previous one ( delete boarding)
+        if self.selected_frame:
+            self.selected_frame.configure(border_width=0)  # unselect previous one ( delete boarding)
+        self.selected_frame = frame
 
         frame.configure(border_width=2, border_color='#5584e0')
         pass
