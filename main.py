@@ -172,7 +172,7 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         data = self.__data__
 
-        new_frame = ctk.CTkScrollableFrame(self, corner_radius=8, border_width=2, width=500, height=300)
+        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2, width=500, height=300)
         new_frame.columnconfigure(0, weight=1)
         self.view_frame = new_frame
         self.view_frame.pack(fill='both', expand=True)
@@ -364,16 +364,14 @@ class UpperMenu(ctk.CTkFrame):
         self.add_buttons()
 
     def add_buttons(self):
-        for col_n in range(4):
-            self.columnconfigure(col_n, weight=1)
 
         upper_arrow_texture = ctk.CTkImage(dark_image=Image.open('uppper_arrow.png'))
         self.upper_arrow_button = ctk.CTkButton(self, image=upper_arrow_texture, text="", width=28, fg_color='transparent')
-        self.upper_arrow_button.grid(row=0, column=0, padx=5, pady=5)
+        self.upper_arrow_button.pack(side='left', fill='y')
 
         down_arrow_texture = ctk.CTkImage(dark_image=Image.open('down_arrow.png'))
         self.down_arrow_button = ctk.CTkButton(self, image=down_arrow_texture, text="", width=28, fg_color='transparent')
-        self.down_arrow_button.grid(row=0, column=1, padx=5, pady=5)
+        self.down_arrow_button.pack(side='left', fill='y')
 
 
 class RightMenu(ctk.CTkFrame):
