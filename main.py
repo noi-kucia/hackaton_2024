@@ -80,7 +80,7 @@ class AutoWrappingCTkLabel(ctk.CTkLabel):
         self.update_wraplength()
 
     def update_wraplength(self):
-        current_width = int(self.winfo_width() / 1.6)
+        current_width = int(self.winfo_width() / 1.2)
         if current_width > 1:  # Avoid wraplength of 0
             self.configure(wraplength=current_width)
 
@@ -338,10 +338,10 @@ class QuizCell(ctk.CTkFrame, Cell):
 
         # Check if the selected answers match the correct answers
         if set(selected_answers) == set(correct_answers):
-            result_text = "Correct!"
+            result_text = "Correct!!!"
             result_color = "#00FF00"
         else:
-            result_text = "Incorrect."
+            result_text = "Incorrect!"
             result_color = "#FF0000"
 
         # Display result
@@ -659,5 +659,5 @@ class App(ctk.CTk):
 if __name__ == '__main__':
     window = App()
     window.title("hackaton")
-    window.minsize(480, 720)
+    window.minsize(800, 1100)
     window.mainloop()
