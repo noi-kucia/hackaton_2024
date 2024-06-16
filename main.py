@@ -367,7 +367,7 @@ class FlashCard(ctk.CTkFrame):
 
         # back side  (initially hidden)
         self.back_text = data["back"]
-        self.back_label = AutoWrappingCTkLabel(self, text=self.back_text, font=('Arial', 20), width=225,
+        self.back_label = AutoWrappingCTkLabel(self, text=self.back_text, font=('Arial', 20), width=200,
                                                height=300, fg_color=self.card_color, corner_radius=15)
         self.back_label.bind('<Button-1>', self.flip)
 
