@@ -402,7 +402,7 @@ class FlashcardCell(ctk.CTkFrame, Cell):
         self.master.select_frame(self)
 
     def _import_(self) -> dict:
-        return {"cell_type": "flash card", "data": self.__data__}
+        return {"cell_type": "flash cards", "data": self.__data__}
 
     def _render_(self):
 
@@ -641,6 +641,8 @@ class App(ctk.CTk):
                             loaded_cells.append(PlainTextCell(self.viewer, cell_data))
                         case 'quiz':
                             loaded_cells.append(QuizCell(self.viewer, cell_data))
+                        case 'flash cards':
+                            loaded_cells.append(FlashcardCell(self.viewer, cell_data))
 
                 # clearing viewer
                 for cell in self.viewer.cells:
