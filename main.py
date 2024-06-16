@@ -762,6 +762,6 @@ class App(ctk.CTk):
 
 if __name__ == '__main__':
     window = App()
-    window.title("hackaton")
+    window.title("Open-IBF editor")
     window.minsize(800, 1100)
     window.mainloop()
