@@ -210,7 +210,7 @@ class QuizCell(ctk.CTkFrame, Cell):
         question_text = data["text"]
         question_label = ctk.CTkLabel(new_frame, text=question_text, font=('Arial', 20))
         question_label.bind("<Button-1>", self.on_click)
-        question_label.grid(row=0, column=0, sticky='WE', padx=10, pady=5)
+        question_label.grid(row=0, column=0, sticky='W', padx=10, pady=5)
 
         # Display the answers with checkboxes
         answers = data.get("answers", [])
@@ -220,7 +220,7 @@ class QuizCell(ctk.CTkFrame, Cell):
             self.answer_vars.append(answer_var)
             answer_checkbox = ctk.CTkCheckBox(new_frame, text=answer, variable=answer_var, onvalue=answer, offvalue="",
                                               font=('Arial', 20))
-            answer_checkbox.grid(row=idx + 1, column=0, padx=20, pady=2)
+            answer_checkbox.grid(row=idx + 1, column=0, padx=20, pady=2, sticky='W')
 
         # Add a button to check answers
         check_button = ctk.CTkButton(new_frame, text="Check Answer", command=self.check_answer)
@@ -451,46 +451,7 @@ class Viewer(ctk.CTkScrollableFrame):
         super().__init__(parent)
         self.selected_frame: ctk.CTkFrame = None  # currently selected frame
 
-        # test cells
-        cell1 = PlainTextCell(self, {
-            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ac sollicitudin eros. Duis vitae arcu maximus, congue enim et, pretium lorem. Sed mauris nisi, pharetra id cursus nec, viverra ut diam. Proin scelerisque molestie turpis, sit amet posuere nisl mattis at. Donec in aliquam massa. Pellentesque ullamcorper scelerisque consectetur. Phasellus blandit massa ex, vel molestie sem malesuada vitae. Mauris euismod egestas mi, nec cursus mi accumsan non. Etiam odio dui, ornare nec iaculis eu, ullamcorper at lorem. Vestibulum tristique, massa et auctor dictum, sem lorem viverra massa, in fringilla velit nisi a diam. Vivamus pharetra placerat ligula, quis congue sem suscipit eget. Donec ullamcorper, leo nec laoreet hendrerit, ligula nisl egestas lacus, id scelerisque tortor justo vel metus. Quisque at dui at diam aliquet lobortis ac in nunc. Sed in tincidunt massa, eget volutpat ipsum. Integer tincidunt eleifend gravida. "})
-
-        cell2 = QuizCell(self, {
-            "text": "What are the primary colors?",
-            "answers": [
-                "Red",
-                "Green",
-                "Blue",
-                "Yellow"
-            ],
-            "correct_answers": [
-                "Red",
-                "Blue",
-                "Yellow"
-            ]
-        })
-
-        cell3 = PlainTextCell(self, {
-            "text": """
-             Donec quis convallis metus. Fusce varius malesuada mollis. Nam bibendum lectus non diam molestie dapibus. Phasellus at vehicula enim. Etiam blandit vehicula lorem vitae aliquet. Sed ac finibus purus, ac ornare dolor. Nunc consectetur porta velit, a hendrerit orci varius a. Maecenas lacinia venenatis hendrerit. Vestibulum non orci porta, accumsan sem vel, mattis purus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
-
-Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vitae nisl ante. Aenean non magna tempus, porttitor dolor nec, iaculis felis. Quisque convallis, nisl sit amet interdum iaculis, massa eros auctor erat, quis facilisis ipsum justo non leo. Nam laoreet, justo sit amet aliquet mattis, felis eros sagittis sapien, quis finibus est lacus vel ligula. Morbi eget suscipit massa. Nulla nec metus in ex egestas semper. Cras consequat felis non scelerisque iaculis. Pellentesque dictum dictum nulla, ut efficitur lorem tincidunt sit amet. Phasellus tempor placerat nisl et fermentum. Vestibulum maximus hendrerit leo id mattis. Nulla quis leo in est malesuada fringilla. Nunc dignissim aliquet lorem, eu varius augue imperdiet sit amet. Nam venenatis metus scelerisque bibendum malesuada. 
-"""})
-        cell0 = FlashcardCell(self, [{
-            "front": "front side text very long",
-            "back": "back side text\nXD",
-            "color": "red"
-        },
-            {"front": "another one very unusual and exciting card",
-             "back": "but on the other side there's only depression", "color": "blue"}
-            ,
-            {"front": "another one very unusual and exciting card",
-             "back": "but on the other side there's only depression", "color": "purple"}
-        ])
-
-        cell4 = ImageCell(self, {'path': 'sample_image.jpg'})
-
-        self.cells: List[Cell] = [cell0, cell1, cell2, cell3, cell4]
+        self.cells: List[Cell] = []
         self.__draw__()
 
     def shift_cell_down(self, event=None):
@@ -750,6 +711,7 @@ class App(ctk.CTk):
                 for cell in self.viewer.cells:
                     cell.grid_forget()
                     cell.destroy()
+                self.viewer.selected_frame = None
                 self.viewer.cells.clear()
 
                 # adding cells from file data
