@@ -488,7 +488,9 @@ Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vita
              "back": "but on the other side there's only depression", "color": "purple"}
         ])
 
-        self.cells: List[Cell] = [cell0, cell1, cell2, cell3]
+        cell4 = ImageCell(self, {'path': 'sample_image.jpg'})
+
+        self.cells: List[Cell] = [cell0, cell1, cell2, cell3, cell4]
         self.__draw__()
 
     def shift_cell_down(self, event=None):
@@ -596,6 +598,45 @@ class UpperMenu(ctk.CTkFrame):
         text_texture = ctk.CTkImage(dark_image=Image.open('text.png'))
         self.add_text_button = ctk.CTkButton(self, image=text_texture, text="", width=32, fg_color='transparent')
         self.add_text_button.pack(side='right', fill='y')
+
+
+class ImageCell(ctk.CTkFrame, Cell):
+
+    def __init__(self, parent, data):
+        """
+
+        :param parent:
+        :param data: {"path": <path to the image>}
+        """
+        super().__init__(parent)
+        self.__data__ = data
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+
+        self.view_frame: ctk.CTkImage = None
+        self.edit_frame: ctk.CTkFrame = None
+
+        self._render_()  # rendering data
+        self._open_()  # showing data
+
+    def _edit_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        pass
+
+    def _open_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
+        self.view_frame.grid(row=0, column=0, padx=2, pady=2, sticky="SWEN")
+
+    def _render_(self):
+        img = Image.open(self.__data__['path'])
+        self.image_frame = ctk.CTkImage(dark_image=img, size=img.size)
+        self.view_frame = ctk.CTkFrame(self)
+        self.image_label = ctk.CTkLabel(self.view_frame, text="", image=self.image_frame)
+        self.image_label.pack()
+
+    def _save_(self):
+        pass
+
+    def _import_(self) -> dict:
+        return {"cell_type": "image", "data": self.__data__}
 
 
 class App(ctk.CTk):
