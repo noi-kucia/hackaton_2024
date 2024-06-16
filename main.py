@@ -2,6 +2,7 @@ import json
 import tkinter
 
 import customtkinter as ctk
+from CTkMessagebox import CTkMessagebox
 from typing import List, Tuple, Generator
 from abc import ABC, abstractmethod
 from PIL import Image, ImageTk
@@ -517,6 +518,45 @@ Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vita
         self.cells = before + after
         self.__draw__()
 
+    def create_text_cell(self, event=None):
+        if not self.selected_frame:
+            self.cells.append(PlainTextCell(self, {"text": ""}))
+            self.__draw__()
+            return
+
+        selected_index = self.cells.index(self.selected_frame)
+        self.cells.insert(selected_index + 1, PlainTextCell(self, {"text": ""}))
+        self.__draw__()
+        return
+
+    def create_quiz_cell(self, event=None):
+        if not self.selected_frame:
+            self.cells.append(QuizCell(self, {"text": "Question", "answers": ["A", "B", "C", "D"],
+            "correct_answers": []}))
+            self.__draw__()
+            return
+
+        selected_index = self.cells.index(self.selected_frame)
+        self.cells.insert(selected_index + 1, QuizCell(self, {"text": "Question", "answers": ["A", "B", "C", "D"],
+            "correct_answers": []}))
+        self.__draw__()
+        return
+
+    def remove_cell(self, event=None):
+        if not self.selected_frame:
+            return
+
+        selected_index = self.cells.index(self.selected_frame)
+        msg_box = CTkMessagebox(title="Delete?", message="Do you want to delete this cell?",
+                        icon="question", option_1="No", option_2="Yes")
+        response = msg_box.get()
+        if response == "Yes":
+            self.cells[selected_index].grid_forget()
+            self.cells[selected_index].destroy()
+            del self.cells[selected_index]
+        self.__draw__()
+        return
+
     def __draw__(self):
         [cell.grid_forget() for cell in self.cells]
         for cell_num, cell in enumerate(self.cells):
@@ -572,6 +612,7 @@ class UpperMenu(ctk.CTkFrame):
         trash_bin_texture = ctk.CTkImage(dark_image=Image.open('trash_bin.png'))
         self.delete_button = ctk.CTkButton(self, image=trash_bin_texture, text="", width=32, fg_color='transparent')
         self.delete_button.pack(side='right', fill='y')
+        self.delete_button.bind('<Button-1>', viewer.remove_cell)
 
         down_arrow_texture = ctk.CTkImage(dark_image=Image.open('down_arrow.png'))
         self.down_arrow_button = ctk.CTkButton(self, image=down_arrow_texture, text="", width=32,
@@ -592,10 +633,12 @@ class UpperMenu(ctk.CTkFrame):
         quiz_texture = ctk.CTkImage(dark_image=Image.open('quiz.png'))
         self.add_quiz_button = ctk.CTkButton(self, image=quiz_texture, text="", width=32, fg_color='transparent')
         self.add_quiz_button.pack(side='right', fill='y')
+        self.add_quiz_button.bind('<Button-1>', viewer.create_quiz_cell)
 
         text_texture = ctk.CTkImage(dark_image=Image.open('text.png'))
         self.add_text_button = ctk.CTkButton(self, image=text_texture, text="", width=32, fg_color='transparent')
         self.add_text_button.pack(side='right', fill='y')
+        self.add_text_button.bind('<Button-1>', viewer.create_text_cell)
 
 
 class App(ctk.CTk):
