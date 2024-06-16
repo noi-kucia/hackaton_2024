@@ -116,7 +116,7 @@ class PlainTextCell(ctk.CTkFrame, Cell):
     def _render_(self):
         data = self.__data__
 
-        new_frame = ctk.CTkFrame(self, corner_radius=8, border_width=2)
+        new_frame = ctk.CTkFrame(self, corner_radius=15, border_width=2)
         new_frame.columnconfigure(0, weight=1)
         new_frame.rowconfigure(0, weight=1)
 
@@ -127,7 +127,7 @@ class PlainTextCell(ctk.CTkFrame, Cell):
         self.view_frame.pack(fill='both', padx=2, pady=2)
 
         text = data["text"]
-        text_frame = AutoWrappingCTkLabel(master=new_frame, text=text, font=('Arial', 20), justify='left')
+        text_frame = AutoWrappingCTkLabel(master=new_frame, text=text, font=('Arial', 20), justify='left', corner_radius=15)
         text_frame.grid(row=0, column=0, sticky='NSEW')
         text_frame.bind('<Double-Button-1>', self._edit_)
         text_frame.bind("<Button-1>", self.on_click)
@@ -594,8 +594,6 @@ class UpperMenu(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent, height=75)
         self.add_buttons()
-        self.central_label = ctk.CTkLabel(self, text='Open-IBF', font=('Arial', 24))
-        self.central_label.pack(fill='y', side='top', pady=(20, 0))
 
     def add_buttons(self):
         viewer = self.master.viewer
@@ -666,13 +664,17 @@ class ImageCell(ctk.CTkFrame, Cell):
         pass
 
     def _open_(self) -> [ctk.CTkFrame, ctk.CTkScrollableFrame]:
-        self.view_frame.grid(row=0, column=0, padx=2, pady=2, sticky="SWEN")
+        self.view_frame.grid(row=0, column=0, padx=3, pady=3, sticky="SWEN")
+
+    def on_click(self, event=None):
+        self.master.select_frame(self)
 
     def _render_(self):
         img = Image.open(self.__data__['path'])
         self.image_frame = ctk.CTkImage(dark_image=img, size=img.size)
         self.view_frame = ctk.CTkFrame(self)
         self.image_label = ctk.CTkLabel(self.view_frame, text="", image=self.image_frame)
+        self.image_label.bind('<Button-1>', self.on_click)
         self.image_label.pack()
 
     def _save_(self):
