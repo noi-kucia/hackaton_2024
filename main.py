@@ -559,6 +559,20 @@ Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vita
         self.__draw__()
         return
 
+    def create_img_cell(self, event=None):
+
+        filename = ctk.filedialog.askopenfilename( title="Select a file",
+                                                   filetypes=(("Image format", "*.png"), ("All files", "*.*")))
+
+        if not self.selected_frame:
+            self.cells.append(ImageCell(self, {"path": filename}))
+            self.__draw__()
+            return
+
+        selected_index = self.cells.index(self.selected_frame)
+        self.cells.insert(selected_index + 1, ImageCell(self, {"path": filename}))
+        self.__draw__()
+        return
     def __draw__(self):
         [cell.grid_forget() for cell in self.cells]
         for cell_num, cell in enumerate(self.cells):
@@ -629,6 +643,7 @@ class UpperMenu(ctk.CTkFrame):
         image_texture = ctk.CTkImage(dark_image=Image.open('image.png'))
         self.add_image_button = ctk.CTkButton(self, image=image_texture, text="", width=32, fg_color='transparent')
         self.add_image_button.pack(side='right', fill='y')
+        self.add_image_button.bind('<Button-1>', viewer.create_img_cell)
 
         quiz_texture = ctk.CTkImage(dark_image=Image.open('quiz.png'))
         self.add_quiz_button = ctk.CTkButton(self, image=quiz_texture, text="", width=32, fg_color='transparent')
@@ -704,7 +719,8 @@ class App(ctk.CTk):
         self.upper_menu.grid(row=upper_menu_coords[0], column=upper_menu_coords[1], columnspan=2, sticky='SWEN', pady=5)
 
     def open_file(self, event=None):
-        filename = ctk.filedialog.askopenfilename()
+        filename = ctk.filedialog.askopenfilename( title="Select a file",
+                                                   filetypes=(("Open interactive book format", "*.ibf"), ("All files", "*.*")))
         if not filename:
             return
 
