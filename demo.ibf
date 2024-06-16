@@ -1,0 +1,73 @@
+[
+    {
+        "cell_type": "image",
+        "data": {
+            "path": "conditional.png"
+        }
+    },
+    {
+        "cell_type": "plain text",
+        "data": {
+            "text": "Pierwszy tryb warunkowy stosujemy, gdy m\u00f3wimy o sytuacjach, kt\u00f3re b\u0119d\u0105 mia\u0142y miejsce w przysz\u0142o\u015bci, je\u015bli warunek postawiony w zdaniu z \u2018if\u2019 zostanie spe\u0142niony.\n\n    If the weather is nice at the weekend, we will go for a walk. (Je\u015bli w weekend b\u0119dzie \u0142adna pogoda, p\u00f3jdziemy na spacer.)\n    If we have time, we will visit you. (Je\u015bli b\u0119dziemy mieli czas, odwiedzimy Was.)\n    If the plane is delayed, they will arrive home in the evening. (Je\u015bli samolot b\u0119dzie op\u00f3\u017aniony, dotr\u0105 do domu wieczorem,)\n\nIF + PRESENT SIMPLE, WILL + BEZOKOLICZNIK.\n"
+        }
+    },
+    {
+        "cell_type": "plain text",
+        "data": {
+            "text": "Drugi tryb warunkowy m\u00f3wi o sytuacjach hipotetycznych, kt\u00f3re s\u0105 nierealne lub prawie nierealne, poniewa\u017c warunek, kt\u00f3ry si\u0119 pojawia jest zazwyczaj niemo\u017cliwy do spe\u0142nienia na chwil\u0119 obecn\u0105.\n\nW tym okresie warunkowym \u2018if\u2019 t\u0142umaczymy jako \u2018gdyby\u2019, bo sytuacja jest hipotetyczna, wi\u0119c, potocznie m\u00f3wi\u0105c, tylko \u2018gdybamy\u2019:\n\n    If I were slimmer, I would become a model. (Gdybym by\u0142a szczuplejsza, zosta\u0142abym modelk\u0105.)\n    If we lived in England, we would speak English better. (Gdyby\u015bmy mieszkali w Anglii, m\u00f3wiliby\u015bmy lepiej po angielsku.)\n    If they were nicer, I would invite them to the party. (Gdyby byli milsi, zaprosi\u0142abym ich na imprez\u0119.)\n\nIF + PAST SIMPLE, WOULD + BEZOKOLICZNIK.\n"
+        }
+    },
+    {
+        "cell_type": "quiz",
+        "data": {
+            "text": "Jakich form u\u017cywamy w 2 trybie warunkowym?",
+            "answers": [
+                "present simple",
+                "bezokolicznik",
+                "past simple",
+                "future continuous"
+            ],
+            "correct_answers": [
+                "bezokolicznik",
+                "past simple"
+            ]
+        }
+    },
+    {
+        "cell_type": "plain text",
+        "data": {
+            "text": "\n  Past tense\n\nThere are two tenses in English \u2013 past and present.\n\nThe past tense in English is used:\n\n    to talk about the past\n    to talk about hypotheses (when we imagine something)\n    for politeness.\n\nThere are four past tense forms in English:\n\nPast simple: \tI worked\nPast continuous: \tI was working\nPast perfect: \tI had worked\nPast perfect continuous: \tI had been working\n\n\n"
+        }
+    },
+    {
+        "cell_type": "plain text",
+        "data": {
+            "text": "Fishki do zapami\u0119tywania:\n"
+        }
+    },
+    {
+        "cell_type": "flash cards",
+        "data": [
+            {
+                "front": "Past Simple",
+                "back": "podmiot + orzeczenie (czasownik w II formie) + reszta zdania",
+                "color": "#ad172d"
+            },
+            {
+                "front": "Past Continuous",
+                "back": " podmiot + was/were + orzeczenie (czasownik + -ing) + reszta zdania",
+                "color": "blue"
+            },
+            {
+                "front": "Past Perfect",
+                "back": "podmiot + had + orzeczenie (czasownik w III formie) + reszta zdania",
+                "color": "purple"
+            },
+            {
+                "front": "Past Perfect Continuous",
+                "back": "podmiot + had been + czasownik z końcówką -ing + reszta zdania",
+                "color": "#c78c0e"
+            }
+        ]
+    }
+]
