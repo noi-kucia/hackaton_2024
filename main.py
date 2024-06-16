@@ -349,21 +349,57 @@ class QuizCell(ctk.CTkFrame, Cell):
         result_label.grid(row=len(self.answer_vars) + 2, column=0, pady=10)
 
 
+class FlashCard(ctk.CTkFrame):
+    def __init__(self, parent, data):
+        super().__init__(parent, fg_color='transparent')
+        self.__data__ = data
+        self.card_color = data["color"]
+
+        self.current_side = 'front'  # Flag to track if currently showing back side
+
+        # front side
+        self.front_text = data["front"]
+        self.front_label = AutoWrappingCTkLabel(self, text=self.front_text, font=('Arial', 20), width=225,
+                                                height=300, fg_color=self.card_color, corner_radius=15)
+        self.front_label.pack(fill='both', expand=True, padx=5, pady=5)
+        self.front_label.bind('<Button-1>', self.flip)
+
+        # back side  (initially hidden)
+        self.back_text = data["back"]
+        self.back_label = AutoWrappingCTkLabel(self, text=self.back_text, font=('Arial', 20), width=225,
+                                               height=300, fg_color=self.card_color, corner_radius=15)
+        self.back_label.bind('<Button-1>', self.flip)
+
+    def flip(self, event=None):
+        if self.current_side == 'front':
+            self.front_label.pack_forget()
+            self.back_label.pack(fill='both', expand=True, padx=5, pady=5)
+
+        else:
+            self.back_label.pack_forget()
+            self.front_label.pack(fill='both', expand=True, padx=5, pady=5)
+
+        self.current_side = 'front' if self.current_side == 'back' else 'back'
+
+
 class FlashcardCell(ctk.CTkFrame, Cell):
     def __init__(self, parent, data):
         """
-        :param data: {"front": <front side text>, "back": <back side text>}
+        :param data: [{"front": <front side text>, "back": <back side text>, "color": <color>}, ...]
         """
         super().__init__(parent, height=230)
         self.bind("<Double-Button-1>", self._edit_)
+        self.bind("<Button-1>", self.on_click)
         self.__data__ = data
 
         self.view_frame = None
         self.edit_frame = None
-        self.current_side = 'front'  # Flag to track if currently showing back side
 
         self._render_()  # Rendering data
         self._open_()  # Showing data
+
+    def on_click(self, event=None):
+        self.master.select_frame(self)
 
     def _import_(self) -> dict:
         return {"cell_type": "flash card", "data": self.__data__}
@@ -373,70 +409,27 @@ class FlashcardCell(ctk.CTkFrame, Cell):
         if self.view_frame:  # deleting old frame
             self.view_frame.destroy()
 
-        data = self.__data__
-
-        new_frame = ctk.CTkFrame(self, corner_radius=15, width=125, height=225, fg_color='#1A09AC')
+        new_frame = ctk.CTkFrame(self, corner_radius=15, width=125, height=225)
         new_frame.bind("<Double-Button-1>", self._edit_)
-
+        new_frame.bind("<Button-1>", self.on_click)
         self.view_frame = new_frame
-        self.view_frame.pack(fill='y', expand=True)
 
-        # Display the front side text
-        self.front_text = data["front"]
-        self.front_label = ctk.CTkLabel(new_frame, text=self.front_text, font=('Arial', 20), width=125, height=225)
-        self.front_label.pack_forget()
-        self.front_label.bind('<Button-1>', self.flip)
+        data = self.__data__
+        self.cards = []
 
-        # Display the back side text (initially hidden)
-        self.back_text = data["back"]
-        self.back_label = ctk.CTkLabel(new_frame, text=self.back_text, font=('Arial', 20), width=125, height=225)
-        self.back_label.bind('<Button-1>', self.flip)
-
-    def flip(self, event=None):
-
-        self.current_side = 'front' if self.current_side == 'back' else 'back'
-        if self.current_side == 'front':
-            self.front_label.pack_forget()
-            self.back_label.pack(fill='both', expand=True, padx=5, pady=5)
-
-        else:
-            self.back_label.pack_forget()
-            self.front_label.pack(fill='both', expand=True, padx=5, pady=5)
+        for i, card_data in enumerate(data):
+            self.cards.append(FlashCard(self.view_frame, card_data))
+            self.cards[-1].grid(row=0, column=i, pady=2, padx=5, sticky='NS')
 
     def _open_(self):
-        self.current_side = 'front'
-        self.front_label.pack(fill='both', expand=True, padx=5, pady=5)
+        if self.edit_frame:
+            self.edit_frame.destroy()
+
+        self.view_frame.pack(fill='both', expand=True, pady=2, padx=2)
 
     def _edit_(self, event=None):
-        if self.edit_frame:
-            self.edit_frame.pack_forget()
-
-        new_frame = ctk.CTkScrollableFrame(self.parent, corner_radius=8, border_width=2, width=500, height=300)
-        self.edit_frame = new_frame
-        self.edit_frame.pack(expand=True, fill='both')
-
-        # Display editable front side text
-        front_label = ctk.CTkLabel(new_frame, text="Front Side:", font=('Arial', 20))
-        front_label.grid(row=0, column=0, sticky='W', padx=10, pady=5)
-        front_entry = ctk.CTkEntry(new_frame, width=60)
-        front_entry.insert(0, self.__data__["front"])
-        front_entry.grid(row=0, column=1, padx=10, pady=5)
-
-        # Display editable back side text
-        back_label = ctk.CTkLabel(new_frame, text="Back Side:", font=('Arial', 20))
-        back_label.grid(row=1, column=0, sticky='W', padx=10, pady=5)
-        back_entry = ctk.CTkEntry(new_frame, width=60)
-        back_entry.insert(0, self.__data__["back"])
-        back_entry.grid(row=1, column=1, padx=10, pady=5)
-
-        # Save button
-        save_button = ctk.CTkButton(new_frame, text="Save",
-                                    command=lambda: self._save_(front_entry.get(), back_entry.get()))
-        save_button.grid(row=2, column=0, columnspan=2, pady=10)
-
-        # Delete button
-        delete_button = ctk.CTkButton(new_frame, text="Delete", command=self._delete_)
-        delete_button.grid(row=3, column=0, columnspan=2, pady=10)
+        pass
+        # TODO: add editor layout
 
     def _save_(self, new_front, new_back):
         self.__data__["front"] = new_front
@@ -483,10 +476,17 @@ class Viewer(ctk.CTkScrollableFrame):
 
 Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vitae nisl ante. Aenean non magna tempus, porttitor dolor nec, iaculis felis. Quisque convallis, nisl sit amet interdum iaculis, massa eros auctor erat, quis facilisis ipsum justo non leo. Nam laoreet, justo sit amet aliquet mattis, felis eros sagittis sapien, quis finibus est lacus vel ligula. Morbi eget suscipit massa. Nulla nec metus in ex egestas semper. Cras consequat felis non scelerisque iaculis. Pellentesque dictum dictum nulla, ut efficitur lorem tincidunt sit amet. Phasellus tempor placerat nisl et fermentum. Vestibulum maximus hendrerit leo id mattis. Nulla quis leo in est malesuada fringilla. Nunc dignissim aliquet lorem, eu varius augue imperdiet sit amet. Nam venenatis metus scelerisque bibendum malesuada. 
 """})
-        cell0 = FlashcardCell(self, {
-            "front": "front side text",
-            "back": "back side text\nXD"
-        })
+        cell0 = FlashcardCell(self, [{
+            "front": "front side text very long",
+            "back": "back side text\nXD",
+            "color": "red"
+        },
+            {"front": "another one very unusual and exciting card",
+             "back": "but on the other side there's only depression", "color": "blue"}
+            ,
+            {"front": "another one very unusual and exciting card",
+             "back": "but on the other side there's only depression", "color": "purple"}
+        ])
 
         self.cells: List[Cell] = [cell0, cell1, cell2, cell3]
         self.__draw__()
@@ -530,7 +530,6 @@ Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vita
         self.selected_frame = frame
 
         frame.configure(border_width=2, border_color='#5584e0')
-        pass
 
     def save_file(self, event=None):
         filename = ctk.filedialog.asksaveasfile().name
