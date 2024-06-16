@@ -430,7 +430,6 @@ class FlashcardCell(ctk.CTkFrame, Cell):
 
     def _edit_(self, event=None):
         pass
-        # TODO: add editor layout
 
     def _save_(self, new_front, new_back):
         self.__data__["front"] = new_front
@@ -553,9 +552,10 @@ Phasellus quis lectus blandit, feugiat arcu sit amet, vulputate ex. Integer vita
                         icon="question", option_1="No", option_2="Yes")
         response = msg_box.get()
         if response == "Yes":
-            self.cells[selected_index].grid_forget()
-            self.cells[selected_index].destroy()
-            del self.cells[selected_index]
+            self.selected_frame.grid_forget()
+            self.selected_frame.destroy()
+            self.cells.remove(self.selected_frame)
+            self.selected_frame = None
         self.__draw__()
         return
 
