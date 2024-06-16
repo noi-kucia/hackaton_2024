@@ -360,14 +360,14 @@ class FlashCard(ctk.CTkFrame):
 
         # front side
         self.front_text = data["front"]
-        self.front_label = AutoWrappingCTkLabel(self, text=self.front_text, font=('Arial', 20), width=225,
+        self.front_label = AutoWrappingCTkLabel(self, text=self.front_text, font=('Arial', 20), width=175,
                                                 height=300, fg_color=self.card_color, corner_radius=15)
         self.front_label.pack(fill='both', expand=True, padx=5, pady=5)
         self.front_label.bind('<Button-1>', self.flip)
 
         # back side  (initially hidden)
         self.back_text = data["back"]
-        self.back_label = AutoWrappingCTkLabel(self, text=self.back_text, font=('Arial', 20), width=200,
+        self.back_label = AutoWrappingCTkLabel(self, text=self.back_text, font=('Arial', 20), width=175,
                                                height=300, fg_color=self.card_color, corner_radius=15)
         self.back_label.bind('<Button-1>', self.flip)
 
