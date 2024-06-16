@@ -725,5 +725,5 @@ class App(ctk.CTk):
 if __name__ == '__main__':
     window = App()
     window.title("Open-IBF editor")
-    window.minsize(800, 1100)
+    window.minsize(800, 900)
     window.mainloop()
